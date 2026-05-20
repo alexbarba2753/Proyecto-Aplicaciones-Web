@@ -1,0 +1,38 @@
+# Dependencias 
+node_modules/
+jspm_packages/
+web_modules/
+
+# Archivos de entorno y credenciales 
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Registros de errores (Logs)
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Carpetas de compilación o distribución 
+dist/
+build/
+.out/
+
+# Carpetas específicas de editores de código 
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

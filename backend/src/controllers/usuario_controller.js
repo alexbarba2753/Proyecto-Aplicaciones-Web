@@ -1,0 +1,279 @@
+// 1. IMPORTACIONES: Traemos el modelo de la Base de Datos y el ayudante de correos
+import Usuario from "../models/Usuario.js";
+import { sendMailToRegister, sendMailToRecoveryPassword } from "../helpers/sendMail.js";
+
+/**
+ * Maneja el registro de nuevos usuarios (Estudiantes, Docentes, Tutores)
+ */
+const registro = async (req, res) => {
+
+    try {
+        // [PASO 1]: Extraemos el email y password del cuerpo de la petición (lo que viene del formulario)
+        const { email, password } = req.body;
+        
+        // [PASO 2]: VALIDACIÓN DE CAMPOS VACÍOS
+        // Convertimos el objeto req.body en un arreglo de valores y verificamos si alguno es un texto vacío ("")
+        if (Object.values(req.body).includes("")) {
+            return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+        }
+        
+        // [PASO 3]: VALIDACIÓN DE DUPLICADOS EN BDD
+        // Hacemos una consulta asíncrona a MongoDB para ver si ya existe alguien con ese mismo correo 
+        const verificarEmailBDD = await Usuario.findOne({ email });
+        if (verificarEmailBDD) {
+            return res.status(400).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
+        }
+        
+        // [PASO 4]: INSTANCIAR EL NUEVO USUARIO
+        // Creamos un nuevo documento en memoria RAM usando la estructura de nuestro Usuario Schema
+        const nuevoUsuario = new Usuario(req.body);
+        
+        // [PASO 5]: ENCRIPTAR CONTRASEÑA
+        // Llamamos al método asíncrono del modelo para transformar la clave en texto plano a un hash seguro de bcrypt
+        nuevoUsuario.password = await nuevoUsuario.encryptPassword(password);
+        
+        // [PASO 6]: GENERAR TOKEN TEMPORAL
+        // Creamos la cadena aleatoria para la verificación del correo
+        const token = nuevoUsuario.createToken();
+        
+        // [PASO 7]: ENVIAR NOTIFICACIÓN POR CORREO
+        // Disparamos el correo llevando el token en el enlace de confirmación
+        await sendMailToRegister(email, token);
+        
+        // [PASO 8]: GUARDAR EN BASE DE DATOS
+        // Impactamos finalmente la base de datos MongoDB local guardando permanentemente el nuevo usuario
+        await nuevoUsuario.save();
+        
+        // [PASO 9]: RESPUESTA EXITOSA Al FRONTEND
+        // Si todo salió bien hasta aquí, respondemos al usuario con un estado 200 (OK)
+        res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
+
+    } catch (error) {
+        // MANEJO DE ERRORES: Si algo falla (ej. se cayó la base de datos), cae aquí
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+
+}
+
+/**
+ * Confirma la cuenta del usuario mediante el token enviado por correo
+ */
+const confirmarMail = async (req, res) => {
+    try {
+        // [PASO 1]: Extraer el token de la URL
+        // req.params captura las variables que viajan directamente en la ruta (ej: /api/confirmar/:token)
+        const { token } = req.params;
+
+        // [PASO 2]: BUSCAR AL USUARIO POR EL TOKEN
+        // Salimos a buscar en MongoDB si existe algún usuario (sea estudiante, docente o tutor) 
+        // que tenga guardado exactamente ese mismo token temporal.
+        // Como es una consulta externa a la Base de Datos, usamos obligatoriamente 'await'.
+        const usuarioBDD = await Usuario.findOne({ token });
+        
+        // Si el token no existe en la BDD (o ya fue usado y borrado), frenamos el proceso.
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "Token inválido o cuenta ya confirmada" });
+        }
+
+        // [PASO 3]: ACTUALIZAR EL ESTADO DEL USUARIO
+        // Como el token coincidió, procedemos a "quemarlo" (limpiarlo) cambiándolo a null 
+        // para que nadie pueda volver a usar el mismo enlace.
+        usuarioBDD.token = null;
+        
+        // Cambiamos el estado de confirmación a true. Esto le permitirá pasar la validación del Login.
+        usuarioBDD.confirmEmail = true;
+
+        // [PASO 4]: GUARDAR LOS CAMBIOS EN MONGO
+        // Guardamos físicamente el documento actualizado en la base de datos local. 
+        // Como impacta el disco duro/red, requiere 'await'.
+        await usuarioBDD.save();
+
+        // [PASO 5]: RESPUESTA EXITOSA
+        // Notificamos al Frontend que la cuenta ha sido activada con éxito.
+        res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesión" });
+
+    } catch (error) {
+        // Captura cualquier fallo crítico en el proceso 
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+
+/**
+ * SOLICITAR RECUPERACIÓN: Verifica el email y envía el correo con el token
+ */
+const recuperarPassword = async (req, res) => {
+    try {
+        // [PASO 1]: Extraemos el correo del formulario del Frontend (req.body)
+        const { email } = req.body;
+        
+        // [PASO 2]: VALIDACIÓN DE EXISTENCIA
+        if (!email) return res.status(400).json({ msg: "Debes ingresar un correo electrónico" });
+        
+        // Consultamos a MongoDB si existe algún usuario registrado con ese correo 
+        const usuarioBDD = await Usuario.findOne({ email });
+        if (!usuarioBDD) return res.status(404).json({ msg: "El usuario no se encuentra registrado" });
+        
+        // [PASO 3]: ASIGNAR TOKEN Y NOTIFICAR
+        // Usamos el método matemático que creamos en el Schema para inyectarle un nuevo token temporal
+        const token = usuarioBDD.createToken();
+        usuarioBDD.token = token;
+        
+        // Enviamos el correo con el enlace seguro 
+        await sendMailToRecoveryPassword(email, token);
+        
+        // Guardamos los cambios en MongoDB (registramos el token en su cuenta)
+        await usuarioBDD.save();
+        
+        // [PASO 4]: RESPUESTA EXITOSA
+        res.status(200).json({ msg: "Revisa tu correo electrónico para reestablecer tu cuenta" });
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+/**
+ * COMPROBAR TOKEN: Valida si el enlace al que dio clic el usuario aún sirve
+ */
+const comprobarTokenPasword = async (req, res) => {
+    try {
+        // [PASO 1]: Capturamos el token de recuperación directamente desde la URL (req.params)
+        const { token } = req.params;
+        
+        // [PASO 2]: VALIDAR EN BASE DE DATOS
+        // Buscamos en MongoDB si hay algún usuario que tenga asignado ese token exacto
+        const usuarioBDD = await Usuario.findOne({ token });
+        
+        // Usamos el operador opcional (?.) para evitar que el código explote si usuarioBDD es undefined.
+        // Si no se encuentra el usuario o el token no coincide, rechazamos la validación.
+        if (usuarioBDD?.token !== token) {
+            return res.status(404).json({ msg: "Lo sentimos, no se puede validar la cuenta" });
+        }
+        
+        // [PASO 3]: RESPUESTA EXITOSA
+        // Si pasó el filtro, le damos luz verde al Frontend para que pinte el formulario de la nueva contraseña
+        res.status(200).json({ msg: "Token confirmado, ya puedes crear tu nuevo password" }); 
+    
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+/**
+ * 3. CREAR NUEVO PASSWORD: Recibe las nuevas contraseñas y las sobreescribe encriptadas
+ */
+const crearNuevoPassword = async (req, res) => {
+    try {
+        // [PASO 1]: Extraemos la nueva clave y su confirmación del body, y el token de la URL
+        const { password, confirmpassword } = req.body;
+        const { token } = req.params;
+        
+        // [PASO 2]: VALIDACIONES DE INTEGRIDAD
+        // Revisamos que no manden campos en blanco
+        if (Object.values(req.body).includes("")) {
+            return res.status(404).json({ msg: "Debes llenar todos los campos" });
+        }
+        // Validamos que hayan escrito exactamente lo mismo en ambos inputs
+        if (password !== confirmpassword) {
+            return res.status(404).json({ msg: "Los passwords no coinciden" });
+        }
+        
+        // Volvemos a buscar al usuario por su token para asegurar que no haya expirado en el proceso
+        const usuarioBDD = await Usuario.findOne({ token });
+        if (!usuarioBDD) return res.status(404).json({ msg: "No se puede validar la cuenta" });
+        
+        // [PASO 3]: QUEMAR TOKEN Y ENCRIPTAR NUEVA CLAVE
+        // Como la operación fue exitosa, eliminamos el token cambiándolo a null para que el link expire definitivamente
+        usuarioBDD.token = null;
+        
+        // Ciframos la nueva contraseña con el algoritmo de bcrypt usando el método del Schema
+        usuarioBDD.password = await usuarioBDD.encryptPassword(password);
+        
+        // Impactamos los cambios finales en la base de datos local
+        await usuarioBDD.save();
+        
+        // [PASO 4]: RESPUESTA DE ÉXITO FINAL
+        res.status(200).json({ msg: "Felicitaciones, ya puedes iniciar sesión con tu nuevo password" }); 
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+
+/**
+ * CONTROLADOR: Valida las credenciales del usuario y permite el inicio de sesión
+ */
+const login = async (req, res) => {
+
+    try {
+        // [PASO 1]: Extraemos las credenciales que el usuario metió en el formulario de Login
+        const { email, password } = req.body;
+        
+        // [PASO 2]: VALIDACIÓN DE CAMPOS VACÍOS
+        if (Object.values(req.body).includes("")) {
+            return res.status(404).json({ msg: "Debes llenar todos los campos" });
+        }
+        
+        // [PASO 3]: BUSCAR AL USUARIO Y FILTRAR CAMPOS
+        // Buscamos en MongoDB por correo
+        // Usamos .select() con signos de menos (-) para excluir campos internos que el Frontend no necesita saber.
+        // Como es una consulta asíncrona a la base de datos de Compass, lleva obligatoriamente 'await'.
+        const usuarioBDD = await Usuario.findOne({ email }).select("-status -__v -token -updatedAt -createdAt");
+        
+        // Si no encuentra ningún documento con ese correo, frena el proceso
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "El usuario no se encuentra registrado" });
+        }
+        
+        // [PASO 4]: VALIDACIÓN DE CUENTA VERIFICADA
+        // Si el usuario no ha hecho clic en el enlace de confirmación que programamos antes, le negamos el acceso (Estado 403: Prohibido)
+        if (!usuarioBDD.confirmEmail) {
+            return res.status(403).json({ msg: "Debes verificar tu cuenta antes de iniciar sesión" });
+        }
+        
+        // [PASO 5]: VERIFICACIÓN DE CONTRASEÑA
+        // Invocamos al método seguro matchPassword de bcrypt que está en tu Schema.
+        // Como bcrypt compara strings encriptados mediante operaciones matemáticas complejas, requiere 'await'.
+        const verificarPassword = await usuarioBDD.matchPassword(password);
+        if (!verificarPassword) {
+            return res.status(401).json({ msg: "El password no es correcto" });
+        }
+        
+        // [PASO 6]: PREPARAR DATOS DE SESIÓN
+        // Desestructuramos el objeto.
+        const { nombre, apellido, direccion, celular, _id, rol } = usuarioBDD;
+        
+        // [PASO 7]: RESPUESTA EXITOSA
+        // Devolvemos los datos limpios al Frontend (React) para que guarde el perfil en su estado global.
+        res.status(200).json({
+            rol,
+            nombre,
+            apellido,
+            direccion,
+            celular,
+            _id,
+            email: usuarioBDD.email
+        });
+
+    } catch (error) {
+        // Manejo de fallos del servidor
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+// Exportamos todos los controladores de cuenta unificados
+export {
+    registro,
+    confirmarMail,
+    recuperarPassword,
+    comprobarTokenPasword,
+    crearNuevoPassword,
+    login
+}
