@@ -1,6 +1,8 @@
 // 1. IMPORTACIONES: Traemos el modelo de la Base de Datos y el ayudante de correos
 import Usuario from "../models/Usuario.js";
 import { sendMailToRegister, sendMailToRecoveryPassword } from "../helpers/sendMail.js";
+import { crearTokenJWT } from "../middlewares/JWT.js";
+import mongoose from "mongoose"
 
 /**
  * Maneja el registro de nuevos usuarios (Estudiantes, Docentes, Tutores)
@@ -248,10 +250,14 @@ const login = async (req, res) => {
         // [PASO 6]: PREPARAR DATOS DE SESIÓN
         // Desestructuramos el objeto.
         const { nombre, apellido, direccion, celular, _id, rol } = usuarioBDD;
-        
+
+        // Generamos un token JWT que incluye el ID y el rol del usuario, usando la función que creamos en el middleware de JWT.
+        const token = crearTokenJWT(usuarioBDD._id, usuarioBDD.rol);
+
         // [PASO 7]: RESPUESTA EXITOSA
-        // Devolvemos los datos limpios al Frontend (React) para que guarde el perfil en su estado global.
+        // Devolvemos los datos limpios para que guarde el perfil en su estado global.
         res.status(200).json({
+            token,
             rol,
             nombre,
             apellido,
@@ -268,12 +274,133 @@ const login = async (req, res) => {
     }
 }
 
-// Exportamos todos los controladores de cuenta unificados
+
+/**
+ * CONTROLADOR: Devuelve los datos del perfil del usuario logueado actualmente.
+ */
+const perfil = (req, res) => {
+    
+    // [PASO 1]: DESESTRUCTURACIÓN CON OPERADOR REST
+    // Tomamos el objeto 'req.usuario' (que nuestro middleware verificarTokenJWT inyectó con éxito).
+    // Extraemos individualmente los campos internos que NO queremos mandarle al Frontend (token, confirmEmail, etc.)
+    const { token, confirmEmail, createdAt, updatedAt, __v, ...datosPerfil } = req.usuario;
+    
+    // [PASO 2]: RESPUESTA AL CLIENTE
+    // Enviamos el objeto 'datosPerfil' completamente limpio y pulido de vuelta al Frontend 
+    res.status(200).json(datosPerfil);
+}
+
+/**
+ * CONTROLADOR: Actualiza los datos del perfil de un usuario existente.
+ */
+const actualizarPerfil = async (req, res) => {
+
+    try {
+        // [PASO 1]: Extraemos el ID de la URL (params) y los nuevos datos del formulario (body)
+        const { id } = req.params;
+        const { nombre, apellido, direccion, celular, email } = req.body;
+        
+        // [PASO 2]: VALIDACIÓN DE SINTAXIS DEL ID
+        // Mongoose verifica si el string del ID tiene la estructura correcta de 24 caracteres hexadecimales de MongoDB.
+        // Si mandan un ID alterado (ej: /api/actualizar/123), frena el código para que Mongoose no explote.
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ msg: `ID inválido: ${id}` });
+        }
+        
+        // [PASO 3]: VERIFICAR SI EL USUARIO EXISTE EN COMPASS
+        const usuarioBDD = await Usuario.findById(id);
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: `No existe el usuario con ID ${id}` });
+        }
+        
+        // [PASO 4]: VALIDACIÓN DE CAMPOS VACÍOS
+        if (Object.values(req.body).includes("")) {
+            return res.status(400).json({ msg: "Debes llenar todos los campos" });
+        }
+        
+        // [PASO 5]: CONTROL DE CORREOS DUPLICADOS
+        // Si el usuario está intentando cambiar su email por uno nuevo...
+        if (usuarioBDD.email !== email) {
+            // Salimos a buscar si ese NUEVO email ya le pertenece a otro estudiante o docente en el sistema
+            const emailExistente = await Usuario.findOne({ email });
+            if (emailExistente) {
+                return res.status(404).json({ msg: `El email ya se encuentra registrado` });  
+            }
+        }
+        
+        // [PASO 6]: ASIGNACIÓN DE NUEVOS VALORES (Operador ??)
+        // Si llega un dato nuevo en el body lo usa; si llega como null o undefined, conserva el que ya estaba en la BDD.
+        usuarioBDD.nombre = nombre ?? usuarioBDD.nombre;
+        usuarioBDD.apellido = apellido ?? usuarioBDD.apellido;
+        usuarioBDD.direccion = direccion ?? usuarioBDD.direccion;
+        usuarioBDD.celular = celular ?? usuarioBDD.celular;
+        usuarioBDD.email = email ?? usuarioBDD.email;
+        
+        // [PASO 7]: GUARDAR CAMBIOS EN MONGO LOCAL
+        await usuarioBDD.save();
+        
+        // [PASO 8]: RESPUESTA EXITOSA
+        // Devolvemos el documento actualizado para que el Frontend refresque la interfaz del usuario
+        res.status(200).json(usuarioBDD);
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+/**
+ * CONTROLADOR: Permite a un usuario logueado cambiar su contraseña desde su perfil.
+ */
+const actualizarPassword = async (req, res) => {
+    try {
+        // [PASO 1]: IDENTIFICAR AL USUARIO LOGUEADO
+        // Usamos el ID del usuario que nuestro middleware 'verificarTokenJWT' inyectó de forma segura en 'req.usuario'.
+        // Salimos a buscar el documento completo en MongoDB Compass local usando 'await'.
+        const usuarioBDD = await Usuario.findById(req.usuario._id);
+        
+        // Si por alguna razón extraña el usuario ya no existe en la base de datos
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "Lo sentimos, el usuario no existe" });
+        }
+
+        // [PASO 2]: VERIFICAR LA CONTRASEÑA ACTUAL
+        // Tomamos el campo 'passwordactual' que el usuario escribió en el formulario (req.body)
+        // y lo comparamos con el hash encriptado de la Base de Datos usando nuestro método 'matchPassword'.
+        const verificarPassword = await usuarioBDD.matchPassword(req.body.passwordactual);
+        
+        // Si no coincide, frenamos el proceso de inmediato por seguridad (no dejamos que cambie la clave)
+        if (!verificarPassword) {
+            return res.status(404).json({ msg: "Lo sentimos, el password actual no es el correcto" });
+        }
+
+        // [PASO 3]: ENCRIPTAR Y GUARDAR LA NUEVA CONTRASEÑA
+        // Si la clave actual fue correcta, tomamos 'passwordnuevo', lo pasamos por el encriptador de bcrypt
+        // y lo asignamos al documento del usuario.
+        usuarioBDD.password = await usuarioBDD.encryptPassword(req.body.passwordnuevo);
+        
+        // Guardamos físicamente los cambios en la base de datos local
+        await usuarioBDD.save();
+
+        // [PASO 4]: RESPUESTA EXITOSA
+        res.status(200).json({ msg: "Password actualizado correctamente" });
+
+    } catch (error) {
+        // Atrapamos cualquier error del servidor
+        console.error(error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+// Exportamos toda la lista final de controladores unificados de tu proyecto
 export {
     registro,
     confirmarMail,
     recuperarPassword,
     comprobarTokenPasword,
     crearNuevoPassword,
-    login
+    login,
+    perfil,
+    actualizarPerfil,
+    actualizarPassword
 }

@@ -53,7 +53,7 @@ const sendMailToRecoveryPassword = (userMail, token) => {
                 <p>Para generar una nueva contraseña de acceso, por favor haga clic en el siguiente enlace seguro:</p>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${process.env.URL_FRONTEND}recuperarpassword/${token}" 
+                    <a href="${process.env.URL_BACKEND}recuperarpassword/${token}" 
                         style="background-color: #003366; color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">
                         Restablecer Contraseña
                     </a>
