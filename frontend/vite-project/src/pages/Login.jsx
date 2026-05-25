@@ -1,104 +1,145 @@
 import { useState } from "react"
 import { MdVisibility, MdVisibilityOff } from "react-icons/md"
-import { Link } from "react-router-dom"
-import { useForm } from "react-hook-form"
+import { Link, useNavigate } from "react-router-dom" // Estandarizado a react-router-dom
+import { useFetch } from '../hooks/useFetch'
 import { ToastContainer } from 'react-toastify'
-import { useFetch } from "../hooks/useFetch"
+import { useForm } from 'react-hook-form'
+import storeAuth from "../context/storeAuth"
 
-export const Login = () => {
+const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
-    const { fetchDataBackend, loading } = useFetch()
+    const navigate = useNavigate()
     const { register, handleSubmit, formState: { errors } } = useForm()
+    const { fetchDataBackend, loading } = useFetch()
+    const {setToken, setRol} = storeAuth()
 
+    // Lógica de autenticación
     const loginUser = async (dataForm) => {
-        // Usamos el endpoint exacto de tu backend: /usuario/login
-        const url = `${import.meta.env.VITE_BACKEND_URL}/usuario/login`
-        const response = await fetchDataBackend(url, dataForm, "POST")
-        
+        // 🎓 CORREGIDO: Apunta al endpoint de tu backend (sin /veterinario)
+        const url = `${import.meta.env.VITE_BACKEND_URL}/login`
+        const response = await fetchDataBackend(url, dataForm, 'POST')
+        setToken(response.token)
+        setRol(response.rol)
         if (response) {
-            console.log("Usuario autenticado con éxito:", response)
-            // Aquí guardaremos el token en el contexto global más adelante
+            // El custom hook useFetch internamente ya guarda el token en el localStorage si lo configuraron así
+            navigate('/dashboard')
         }
     }
 
     return (
-        <div className="flex flex-col sm:flex-row h-screen font-sans">
+        <div className="flex flex-col sm:flex-row h-screen bg-gray-50 font-sans">
             <ToastContainer />
 
-            {/* Panel Izquierdo: Formulario */}
-            <div className="w-full sm:w-1/2 h-screen bg-white flex justify-center items-center p-6">
-                <div className="md:w-4/5 w-full">
-                    <h1 className="text-3xl font-semibold mb-2 text-center uppercase text-gray-600">PracticasPPoli</h1>
-                    <small className="text-gray-400 block my-4 text-sm text-center">
-                        Gestión de Prácticas Preprofesionales ESFOT - Iniciar Sesión
-                    </small>
+            {/* Lado Izquierdo: Banner Corporativo de PraxisFlow (Reemplaza a doglogin.jpg) */}
+            <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-slate-800 to-slate-950 flex-col justify-center items-start p-12 text-white">
+                <div className="max-w-md mx-auto h-full flex flex-col justify-center">
+                    <span className="bg-slate-700 text-slate-300 text-xs uppercase px-3 py-1 rounded-full font-bold tracking-wider mb-4 w-max">
+                        Portal Institucional
+                    </span>
+                    <h2 className="text-4xl font-extrabold mb-4 leading-tight">
+                        PraxisFlow
+                    </h2>
+                    <p className="text-slate-400 text-lg">
+                        Inicia sesión para registrar tus bitácoras, gestionar el seguimiento de tus horas y validar tus prácticas preprofesionales ESFOT.
+                    </p>
+                </div>
+            </div>
 
+            {/* Lado Derecho: Formulario de Login */}
+            <div className="w-full sm:w-1/2 flex justify-center items-center bg-white p-8">
+                <div className="w-full max-w-md">
+
+                    <h1 className="text-3xl font-bold text-gray-800 text-center uppercase tracking-wide">
+                        Bienvenido(a)
+                    </h1>
+                    <p className="text-gray-400 text-center mt-2 mb-6 text-sm">
+                        Por favor, ingresa tus credenciales institucionales
+                    </p>
+
+                    {/* Formulario */}
                     <form onSubmit={handleSubmit(loginUser)} className="space-y-4">
+
                         {/* Campo Correo */}
                         <div>
-                            <label className="mb-1 block text-sm font-semibold text-gray-700">Correo Institucional</label>
-                            <input 
-                                type="email" 
-                                placeholder="ejemplo@epn.edu.ec" 
-                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico</label>
+                            <input
+                                type="email"
+                                placeholder="ejemplo@epn.edu.ec"
+                                className="w-full rounded-lg border border-gray-300 focus:outline-none focus:border-slate-600 px-3 py-2 text-gray-600 transition"
                                 {...register("email", { required: "El correo es obligatorio" })}
                             />
-                            {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
+                            {errors.email && <p className="text-red-600 text-xs mt-1 font-medium">{errors.email.message}</p>}
                         </div>
 
                         {/* Campo Contraseña */}
                         <div>
-                            <div className="flex justify-between items-center mb-1">
-                                <label className="text-sm font-semibold text-gray-700">Contraseña</label>
-                                <Link to="/forgot" className="text-xs text-gray-500 hover:underline">¿Olvidaste tu contraseña?</Link>
-                            </div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Contraseña</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     placeholder="************"
-                                    className="w-full rounded-md border border-gray-300 px-3 py-1.5 pr-10 text-gray-600 focus:outline-gray-400"
+                                    className="w-full rounded-lg border border-gray-300 focus:outline-none focus:border-slate-600 px-3 py-2 pr-10 text-gray-600 transition"
                                     {...register("password", { required: "La contraseña es obligatoria" })}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                                 >
                                     {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
                                 </button>
                             </div>
-                            {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
+                            {errors.password && <p className="text-red-600 text-xs mt-1 font-medium">{errors.password.message}</p>}
                         </div>
 
-                        {/* Botón Ingresar */}
+                        {/* Botón Login */}
                         <div>
                             <button 
-                                type="submit" 
-                                className="bg-gray-600 text-white py-2 w-full rounded-md mt-2 font-semibold shadow-md hover:bg-gray-700 transition duration-300"
+                                type="submit"
+                                className="py-2.5 w-full block text-center bg-slate-700 text-white font-semibold rounded-xl shadow-sm transition duration-300 hover:scale-102 hover:bg-slate-900 disabled:opacity-50" 
                                 disabled={loading}
                             >
-                                {loading ? "Verificando..." : "Ingresar al Sistema"}
+                                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                             </button>
                         </div>
+
                     </form>
 
-                    {/* Enlace al Registro */}
-                    <div className="mt-6 text-sm flex justify-between items-center text-gray-600">
-                        <p>¿Eres nuevo en el sistema o vas a Iniciar ya tus practicas?</p>
-                        <Link to="/register" className="py-1.5 px-4 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition duration-300">
-                            Crea un Nuevo Usuario
+                    {/* Separador */}
+                    <div className="mt-6 flex items-center text-gray-300">
+                        <hr className="flex-1 border-gray-200" />
+                        <span className="px-3 text-xs uppercase text-gray-400 font-bold">O</span>
+                        <hr className="flex-1 border-gray-200" />
+                    </div>
+
+                    {/* Botón Google */}
+                    <button className="w-full mt-4 flex items-center justify-center border border-gray-300 py-2 rounded-xl text-sm font-medium text-gray-600 transition duration-300 hover:bg-gray-50">
+                        <img className="w-5 mr-2" src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google Logo" />
+                        Ingresar con Google institucional
+                    </button>
+
+                    {/* Enlace para olvidaste tu contraseña */}
+                    <div className="mt-6 text-center text-sm border-t border-gray-100 pt-4">
+                        {/* 🎓 CORREGIDO: Removido el /id innecesario de la URL */}
+                        <Link to="/forgot" className="text-slate-600 font-medium hover:underline">
+                            ¿Olvidaste tu contraseña?
                         </Link>
                     </div>
+
+                    {/* Enlaces para volver o registrarse */}
+                    <div className="mt-4 flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm">
+                        <Link to="/" className="text-gray-500 font-medium hover:underline">Regresar al Home</Link>
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-500">¿No tienes cuenta?</span>
+                            <Link to="/register" className="font-bold text-slate-700 hover:underline">Registrarse</Link>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-            {/* Panel Derecho: Mensaje Institucional */}
-            <div className="w-full sm:w-1/2 h-1/3 sm:h-screen bg-gradient-to-br from-gray-800 to-gray-950 sm:flex hidden flex-col justify-center items-center text-white p-12">
-                <h2 className="text-4xl font-bold mb-4">ESFOT EPN</h2>
-                <p className="text-center text-gray-300 max-w-sm">
-                    Accede a tu panel para gestionar tus bitácoras, registrar actividades y validar tus horas de prácticas.
-                </p>
-            </div>
         </div>
-    )
-}
+    );
+};
+
+export default Login;
