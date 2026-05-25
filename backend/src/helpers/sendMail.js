@@ -19,7 +19,7 @@ const sendMailToRegister = (userMail, token) => {
                 <p>Para activar su cuenta y validar su acceso, por favor haga clic en el siguiente enlace institucional:</p>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${process.env.URL_BACKEND}confirmar/${token}" 
+                    <a href="${process.env.URL_FRONTEND}confirmar/${token}"
                         style="background-color: #003366; color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">
                         Confirmar Cuenta
                     </a>
