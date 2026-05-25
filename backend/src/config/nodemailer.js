@@ -23,7 +23,7 @@ const sendMail = async (to, subject, html) => {
 
     try {
         const info = await transporter.sendMail({
-            from: '"Sistema de Prácticas ESFOT"" <no-reply@epn.edu.ec>',
+            from: '"Sistema de Prácticas ESFOT" <no-reply@epn.edu.ec>',
             to,
             subject,
             html,
