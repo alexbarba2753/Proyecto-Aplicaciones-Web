@@ -1,74 +1,67 @@
-# Backend - Proyecto Aplicaciones Web
+# Frontend - Proyecto Aplicaciones Web
 
 ## Resumen
 
-Este es el servidor backend del proyecto. Está desarrollado con Node.js, Express y MongoDB, y ofrece las rutas y lógica necesarias para la gestión de usuarios, autenticación, correo electrónico y otras operaciones de la API.
+Este es el cliente web desarrollado con React y Vite. Está diseñado para integrarse con el backend del proyecto y ofrece una interfaz para registro, inicio de sesión, recuperación de contraseña y flujo de confirmación.
 
 ## Stack principal
 
-- Node.js
-- Express 5
-- MongoDB con Mongoose
-- JSON Web Tokens (JWT)
-- bcryptjs
-- Nodemailer
-- Socket.IO
+- Vite
+- React 18
+- Tailwind CSS
+- React Router Dom
+- React Hook Form
+- Axios
+- Zustand
+- React Toastify
 - Stripe
-- Cloudinary
-- dotenv
-- CORS
-- express-fileupload
-- fs-extra
+- Socket.IO Client
 
 ## Estructura principal
 
-- `src/index.js` - Punto de entrada del servidor
-- `src/server.js` - Configuración de Express, middlewares y rutas
-- `src/database.js` - Conexión a MongoDB
-- `src/config/nodemailer.js` - Configuración de envío de correos
-- `src/controllers/usuario_controller.js` - Lógica de controladores de usuario
-- `src/helpers/sendMail.js` - Helper para enviar emails
-- `src/middlewares/JWT.js` - Middleware de autenticación JWT
-- `src/models/Usuario.js` - Modelo de usuario con Mongoose
-- `src/routers/user_routes.js` - Rutas de usuario y endpoints API
+- `src/main.jsx` - Punto de entrada de la aplicación
+- `src/App.jsx` - Componente raíz
+- `src/index.css` / `src/App.css` - Estilos globales
+- `src/context/storeAuth.jsx` - Estado de autenticación con Zustand
+- `src/hooks/useFetch.js` - Hook personalizado para peticiones
+- `src/layout/Dashboard.jsx` - Layout principal de usuario
+- `src/pages/` - Vistas principales:
+  - `Home.jsx`
+  - `Login.jsx`
+  - `Register.jsx`
+  - `Forgot.jsx`
+  - `Reset.jsx`
+  - `Confirm.jsx`
+- `src/routes/ProtectedRoute.jsx` - Ruta protegida para usuarios autenticados
+- `src/routes/PublicRoute.jsx` - Ruta pública para visitantes
 
 ## Scripts disponibles
 
-- `npm start` - Inicia el servidor usando `node src/index.js`
-- `npm run dev` - Inicia el servidor en modo vigilancia con `node --watch src/index.js`
+- `npm run dev` - Inicia el servidor de desarrollo de Vite
+- `npm run build` - Genera la versión de producción
+- `npm run preview` - Previsualiza la build de producción
+- `npm run lint` - Ejecuta ESLint en todo el proyecto
 
-## Configuración requerida
-
-Crea un archivo `.env` en la carpeta `backend` con al menos las siguientes variables:
-
-```env
-PORT=3000
-MONGODB_URI_LOCAL=mongodb://localhost:27017/tu_base_datos
-JWT_SECRET=tu_clave_secreta
-HOST_MAILTRAP=smtp.gmail.com
-PORT_MAILTRAP=587
-USER_MAILTRAP=tu_usuario@gmail.com
-PASS_MAILTRAP=tu_contraseña
-```
-
-> Ajusta las variables de correo según tu proveedor si no usas Gmail.
-
-## Uso básico
+## Instalación y ejecución
 
 1. Instala las dependencias:
    ```bash
-   cd backend
+   cd frontend/vite-project
    npm install
    ```
-2. Configura el archivo `.env`
-3. Inicia el servidor:
+2. Inicia el servidor de desarrollo:
    ```bash
    npm run dev
    ```
-4. Abre `http://localhost:3000`
+3. Abre el navegador en la URL que muestre Vite (usualmente `http://localhost:5173`).
+
+## Conexión con el backend
+
+- Esta aplicación espera una API backend funcionando que provea autenticación y endpoints de usuario.
+- Ajusta las URL de API en los llamados de `axios` según tu entorno local o de producción.
 
 ## Notas
 
-- La API actualmente expone una ruta raíz `GET /` que devuelve `Server on`.
-- Las rutas del usuario se registran bajo `/api`.
-- Cualquier ruta no encontrada devuelve un error 404 con el mensaje `Endpoint no encontrado - 404`.
+- La aplicación usa Stripe para pagos y Stripe Elements en el frontend.
+- Tailwind CSS está configurado a través de `@tailwindcss/vite`.
+- El proyecto ya incluye rutas públicas y protegidas, además de manejo de formularios con validación.
