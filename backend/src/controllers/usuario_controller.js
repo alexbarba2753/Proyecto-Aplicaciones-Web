@@ -35,25 +35,26 @@ const registro = async (req, res) => {
         nuevoUsuario.password = await nuevoUsuario.encryptPassword(password);
         
         // [PASO 6]: GENERAR TOKEN TEMPORAL
+        // Creamos la cadena aleatoria para la verificación del correo
         const token = nuevoUsuario.createToken();
         
-        // [PASO 7]: GUARDAR EN BASE DE DATOS 
-        // Guardamos primero para asegurar que el registro quede listo
-        const usuarioGuardado = await nuevoUsuario.save();
-        
-        // [PASO 8]: ENVIAR NOTIFICACIÓN POR CORREO 
-        // Despachamos el correo. Si implementaste el 'throw error' que pusimos antes, 
-        // cualquier fallo de Gmail saltará directo al catch de abajo en vez de congelar la app.
+        // [PASO 7]: ENVIAR NOTIFICACIÓN POR CORREO
+        // Disparamos el correo llevando el token en el enlace de confirmación
         await sendMailToRegister(email, token);
         
-        // [PASO 9]: RESPUESTA EXITOSA AL FRONTEND
-        return res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
+        // [PASO 8]: GUARDAR EN BASE DE DATOS
+        // Impactamos finalmente la base de datos MongoDB local guardando permanentemente el nuevo usuario
+        await nuevoUsuario.save();
+        
+        // [PASO 9]: RESPUESTA EXITOSA Al FRONTEND
+        // Si todo salió bien hasta aquí, respondemos al usuario con un estado 200 (OK)
+        res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
 
     } catch (error) {
-        // MANEJO DE ERRORES
-        console.error("🚨 Error capturado en registro:", error);
-        return res.status(500).json({ msg: `❌ Error en el servidor o envío de correo - ${error.message || error}` });
+        // MANEJO DE ERRORES: Si algo falla (ej. se cayó la base de datos), cae aquí
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
     }
+
 }
 
 /**
