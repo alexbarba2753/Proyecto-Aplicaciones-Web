@@ -18,10 +18,9 @@ export const Confirm = () => {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-50 font-sans p-6">
-            {/* Mantengo tu ToastContainer para que veas el mensaje de confirmación del Backend */}
+            
             <ToastContainer />
             
-            {/* Icono animado/elegante en lugar del perro del ingeniero */}
             <div className="flex items-center justify-center h-40 w-40 rounded-full bg-green-100 text-green-600 border-4 border-solid border-green-500 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-20 h-20 animate-bounce">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />

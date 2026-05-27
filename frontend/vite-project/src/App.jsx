@@ -5,21 +5,23 @@ import { Register } from './pages/Register'
 import { Confirm } from './pages/Confirm'
 import { Forgot } from './pages/Forgot' 
 import { Reset } from './pages/Reset' 
+import Dashboard from './layout/Dashboard'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Ruta principal */}
-        <Route path="/" element={<Home />} />
-
-        {/* Rutas de autenticación */}
+        <Route index element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/confirmar/:token" element={<Confirm />} />
-        
         <Route path='/forgot' element={<Forgot />} />
         <Route path='/recuperarpassword/:token' element={<Reset />} />
+
+        <Route path="/dashboard" element={<Dashboard />}>
+          <Route index element={null} />
+        </Route>
 
         {/* Ruta comodín */}
         <Route path="*" element={<Navigate to="/" />} />

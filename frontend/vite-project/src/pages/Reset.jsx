@@ -11,7 +11,7 @@ export const Reset = () => {
     const [tokenback, setTokenBack] = useState(false)
     const { register, handleSubmit, formState: { errors }, watch } = useForm()
 
-    // 💾 Enviar la nueva contraseña (Lógica corregida de orden y bugs)
+    // Envia la nueva contraseña
     const changePassword = async (dataForm) => {
         // Endpoint sincronizado con tu Backend: /api/nuevopassword/:token
         const url = `${import.meta.env.VITE_BACKEND_URL}/nuevopassword/${token}`
@@ -27,7 +27,7 @@ export const Reset = () => {
         }
     }
 
-    // 🕵️‍♂️ Verificación del token al cargar la vista
+
     useEffect(() => {
         const verifyToken = async () => {
             // Endpoint sincronizado con tu Backend: /api/recuperarpassword/:token
@@ -61,7 +61,7 @@ export const Reset = () => {
                 </small>
 
                 {tokenback ? (
-                    // Formulario de cambio de contraseña sin etiquetas rotas
+                   
                     <form className="w-full mt-4 space-y-4" onSubmit={handleSubmit(changePassword)}>
 
                         {/* Campo nueva contraseña */}
