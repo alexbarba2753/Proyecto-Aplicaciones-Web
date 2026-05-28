@@ -4,6 +4,9 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import routerUser from './routers/user_routes.js'
 
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './swagger.js'
+
 // Inicializaciones
 const app = express()
 dotenv.config()
@@ -25,7 +28,10 @@ app.get('/',(req,res)=> res.send("Server on"))
 // Rutas para usuarios
 app.use('/api',routerUser)
 
-// Manejo de una ruta que no sea encontrada
+// Esto hará que la documentación sea accesible en la raíz del backend /api-docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
+// Manejo de una ruta que no sea encontrada 
 app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
 
 
