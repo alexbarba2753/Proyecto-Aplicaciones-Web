@@ -97,48 +97,48 @@ router.post('/usuario/login', login)
 /**
  * @openapi
  * /usuario/perfil:
- * get:
- * summary: Obtener perfil del usuario
- * description: Retorna los datos del usuario autenticado (Requiere Token JWT).
- * responses:
- * 200:
- * description: Datos del perfil obtenidos correctamente.
+ *   get:
+ *     summary: Obtener perfil del usuario
+ *     description: Retorna los datos del usuario autenticado (Requiere Token JWT).
+ *     responses:
+ *       200:
+ *         description: Datos del perfil obtenidos correctamente.
  */
 router.get('/usuario/perfil', verificarTokenJWT, perfil)
 
 /**
  * @openapi
  * /usuario/actualizarperfil/{id}:
- * put:
- * summary: Actualizar datos del perfil
- * description: Modifica la información del usuario por su ID (Requiere Token JWT).
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: string
- * responses:
- * 200:
- * description: Perfil actualizado correctamente.
+ *   put:
+ *     summary: Actualizar datos del perfil
+ *     description: Modifica la información del usuario por su ID (Requiere Token JWT).
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado correctamente.
  */
 router.put('/usuario/actualizarperfil/:id', verificarTokenJWT, actualizarPerfil)
 
 /**
  * @openapi
  * /usuario/actualizarpassword/{id}:
- * put:
- * summary: Cambiar contraseña desde el perfil
- * description: Permite al usuario logueado cambiar su clave actual por una nueva (Requiere Token JWT).
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: string
- * responses:
- * 200:
- * description: Contraseña cambiada con éxito.
+ *   put:
+ *     summary: Cambiar contraseña desde el perfil
+ *     description: Permite al usuario logueado cambiar su clave actual por una nueva (Requiere Token JWT).
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Contraseña cambiada con éxito.
  */
 router.put('/usuario/actualizarpassword/:id', verificarTokenJWT, actualizarPassword)
 
