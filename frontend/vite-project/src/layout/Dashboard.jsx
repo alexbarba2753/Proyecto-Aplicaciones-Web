@@ -31,7 +31,7 @@ const Dashboard = () => {
                         </span>
                     </div>
 
-                    {/* 🔧 CORREGIDO: Espaciado limpio para que no se tape el Rol */}
+
                     <div className="px-2 mb-6 border-b border-slate-800/60 pb-5 text-sm space-y-2">
                         <p className="text-slate-400 flex items-center gap-2 font-medium"> 
                             <span className="bg-emerald-500 w-2.5 h-2.5 inline-block rounded-full animate-pulse"></span> 
@@ -43,7 +43,7 @@ const Dashboard = () => {
                         </p>
                     </div>
 
-                    {/* 🛠️ AÑADIDO: Menú de Navegación Completo adaptado al del inge */}
+
                     <nav className="space-y-1.5">
                         {/* Enlace Inicio */}
                         <Link 
@@ -111,7 +111,6 @@ const Dashboard = () => {
                 </button>
             </aside>
 
-            {/* 🖥️ ÁREA DE CONTENIDO PRINCIPAL */}
             <main className="flex-1 flex flex-col min-w-0">
                 
                 {/* BARRA SUPERIOR (HEADER) */}

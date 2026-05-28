@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form"
-// 🎓 ADAPTADO: Importaciones apuntando a tus archivos y nombres exactos
 import storeProfile from "../../context/userProfile"
 import storeAuth from "../../context/storeAuth"
 import { useNavigate } from "react-router-dom"
 
-const userCardPassword = () => {
+const UserCardPassword = () => {
     const { register, handleSubmit, formState: { errors } } = useForm()
     const { user, updatePasswordProfile } = storeProfile()
     const { clearToken } = storeAuth()
@@ -15,7 +14,7 @@ const userCardPassword = () => {
         const url = `${import.meta.env.VITE_BACKEND_URL}/usuario/actualizarpassword/${user?._id}`
         const response = await updatePasswordProfile(url, dataForm)
         
-        // Si el backend responde con éxito, limpiamos el token y redirigimos al login
+
         if (response) {
             clearToken()
             navigate('/login')
@@ -45,7 +44,7 @@ const userCardPassword = () => {
                 <div>
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-400">Contraseña Actual</label>
                     <input 
-                        type="password" // 🔐 CORREGIDO: De "text" a "password" por seguridad
+                        type="password" 
                         placeholder="••••••••••••" 
                         className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-800 focus:border-amber-500 focus:bg-slate-950 focus:outline-none transition duration-200"
                         {...register("passwordactual", { required: "La contraseña actual es obligatoria" })}
@@ -59,7 +58,7 @@ const userCardPassword = () => {
                 <div>
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-400">Nueva Contraseña</label>
                     <input 
-                        type="password" // 🔐 CORREGIDO: De "text" a "password" por seguridad
+                        type="password" 
                         placeholder="Mínimo 6 caracteres" 
                         className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-800 focus:border-amber-500 focus:bg-slate-950 focus:outline-none transition duration-200"
                         {...register("passwordnuevo", { required: "La nueva contraseña es obligatoria" })}
@@ -87,4 +86,4 @@ const userCardPassword = () => {
     )
 }
 
-export default userCardPassword
+export default UserCardPassword

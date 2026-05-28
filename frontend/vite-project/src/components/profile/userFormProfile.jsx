@@ -1,10 +1,9 @@
 import { useEffect } from "react"
-// 🎓 ADAPTADO: Importación apuntando a tu archivo exacto userProfile
 import storeProfile from "../../context/userProfile"
 import { useForm } from "react-hook-form"
 import { ToastContainer } from 'react-toastify'
 
-const userFormularioPerfil = () => {
+const UserFormularioPerfil = () => {
     const { user, updateProfile } = storeProfile()
     const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
@@ -32,7 +31,7 @@ const userFormularioPerfil = () => {
             
             <div className="flex flex-col md:flex-row">
                 
-                {/* 🎨 SECCIÓN IZQUIERDA: Panel Estético / Informativo */}
+                {/* SECCIÓN IZQUIERDA: Panel Estético / Informativo */}
                 <div className="md:w-1/3 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800">
                     <div>
                         <div className="h-8 w-8 rounded-lg bg-blue-600/10 border border-blue-500/30 flex items-center justify-center mb-4">
@@ -55,7 +54,7 @@ const userFormularioPerfil = () => {
                     </div>
                 </div>
 
-                {/* 📝 SECCIÓN DERECHA: El Formulario Real */}
+
                 <form onSubmit={handleSubmit(updateUser)} className="flex-1 p-8 space-y-5">
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -139,4 +138,4 @@ const userFormularioPerfil = () => {
     )
 }
 
-export default userFormularioPerfil
+export default UserFormularioPerfil

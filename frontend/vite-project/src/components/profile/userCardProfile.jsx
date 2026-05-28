@@ -1,7 +1,5 @@
-// 🎓 ADAPTADO: Importación apuntando a tu archivo exacto userProfile
 import storeProfile from "../../context/userProfile"
-
-export const userCardProfile = () => {
+export const UserCardProfile = () => {
     // Jalamos los datos del usuario logueado desde tu store global
     const { user } = storeProfile() 
 
@@ -65,4 +63,4 @@ export const userCardProfile = () => {
     )
 }
 
-export default userCardProfile
+export default UserCardProfile

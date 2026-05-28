@@ -2,7 +2,6 @@ import { Navigate, Outlet } from "react-router-dom"
 import storeAuth from "../context/storeAuth"
 
 const PublicRoute = () => {
-    // 🛠️ CORREGIDO: Desestructuración directa igual que en App.jsx
     const { token } = storeAuth()
     
     // Si ya está logueado, lo manda al dashboard; si no, le deja ver la página pública
