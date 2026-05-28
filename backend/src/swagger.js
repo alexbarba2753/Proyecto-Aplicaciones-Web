@@ -1,4 +1,10 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const swaggerOptions = {
     swaggerDefinition: {
@@ -11,13 +17,13 @@ const swaggerOptions = {
         servers: [
         {
             
-            url: 'https://proyecto-aplicaciones-web-chi.vercel.app/api',
-            description: 'Servidor de Producción (Vercel)'
+            url: '/api',
+            description: 'Servidor Actual'
         }
         ],
     },
-    // Al usar './routers/*.js', Swagger buscará exactamente la carpeta local routers/ que tienes junto a server.js
-    apis: ['./routers/*.js'], 
+
+    apis: [path.join(__dirname, './routers/*.js')], 
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
