@@ -1,0 +1,391 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Proyecto Web",
+    "version": "1.0.0",
+    "description": "Documentación Swagger de la API del backend"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegistroRequest": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "RecuperarPasswordRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "NuevoPasswordRequest": {
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "ActualizarPerfilRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "ActualizarPasswordRequest": {
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "UsuarioResponse": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/registro": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Registrar un usuario nuevo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario registrado con éxito"
+          },
+          "400": {
+            "description": "Error en los datos de registro"
+          }
+        }
+      }
+    },
+    "/api/confirmar/{token}": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Confirmar la cuenta de un usuario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cuenta confirmada"
+          },
+          "400": {
+            "description": "Token inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/recuperarpassword": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Solicitar recuperación de contraseña",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecuperarPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correo de recuperación enviado"
+          }
+        }
+      }
+    },
+    "/api/recuperarpassword/{token}": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Verificar token para recuperar contraseña",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token válido"
+          },
+          "400": {
+            "description": "Token inválido"
+          }
+        }
+      }
+    },
+    "/api/nuevopassword/{token}": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Establecer nueva contraseña usando token",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevoPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada correctamente"
+          }
+        }
+      }
+    },
+    "/api/usuario/login": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Iniciar sesión de usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login correcto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Credenciales incorrectas"
+          }
+        }
+      }
+    },
+    "/api/usuario/perfil": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Obtener perfil del usuario autenticado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil del usuario"
+          },
+          "401": {
+            "description": "Token inválido o no autorizado"
+          }
+        }
+      }
+    },
+    "/api/usuario/actualizarperfil/{id}": {
+      "put": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Actualizar datos de perfil del usuario",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarPerfilRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        }
+      }
+    },
+    "/api/usuario/actualizarpassword/{id}": {
+      "put": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Actualizar contraseña de usuario",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada correctamente"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}
