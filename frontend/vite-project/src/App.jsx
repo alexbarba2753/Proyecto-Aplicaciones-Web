@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react' // 🎓 AGREGADO: Necesario para el useEffect del inge
+import { useEffect } from 'react' 
 import { Home } from './pages/Home' 
 import Login  from './pages/Login'
 import { Register } from './pages/Register'
@@ -11,6 +11,7 @@ import PublicRoute from './routes/PublicRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
 import storeAuth from './context/storeAuth'
 import storeProfile from './context/userProfile' 
+
 
 function App() {
 

@@ -29,11 +29,22 @@ export const Register = () => {
                     </small> 
                     
                     <form onSubmit={handleSubmit(registerUser)} className="space-y-3">
+                        
                         {/* Campo nombre */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Nombre</label>
-                            <input type="text" placeholder="Ingresa tu nombre" className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
-                            {...register("nombre", { required: "El nombre es obligatorio" })}
+                            <input 
+                                type="text" 
+                                placeholder="Ingresa tu nombre" 
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                {...register("nombre", { 
+                                    required: "El nombre es obligatorio",
+                                    pattern: {
+                                        value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+                                        message: "El nombre solo puede contener letras y espacios"
+                                    },
+                                    minLength: { value: 2, message: "El nombre debe tener al menos 2 caracteres" }
+                                })}
                             />
                             {errors.nombre && <p className="text-red-600 text-xs mt-1">{errors.nombre.message}</p>}
                         </div>
@@ -41,8 +52,18 @@ export const Register = () => {
                         {/* Campo apellido */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Apellido</label>
-                            <input type="text" placeholder="Ingresa tu apellido" className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
-                            {...register("apellido", { required: "El apellido es obligatorio" })}
+                            <input 
+                                type="text" 
+                                placeholder="Ingresa tu apellido" 
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                {...register("apellido", { 
+                                    required: "El apellido es obligatorio",
+                                    pattern: {
+                                        value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+                                        message: "El apellido solo puede contener letras y espacios"
+                                    },
+                                    minLength: { value: 2, message: "El apellido debe tener al menos 2 caracteres" }
+                                })}
                             />
                             {errors.apellido && <p className="text-red-600 text-xs mt-1">{errors.apellido.message}</p>}
                         </div>
@@ -50,8 +71,20 @@ export const Register = () => {
                         {/* Campo celular */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Celular</label>
-                            <input type="text" inputMode="tel" placeholder="Ej: 0987654321" className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
-                            {...register("celular", { required: "El celular es obligatorio" })}
+                            <input 
+                                type="text" 
+                                inputMode="tel" 
+                                placeholder="Ej: 0987654321" 
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                {...register("celular", { 
+                                    required: "El celular es obligatorio",
+                                    pattern: {
+                                        value: /^[0-9]+$/,
+                                        message: "El celular solo puede contener números sin espacios ni letras"
+                                    },
+                                    maxLength: { value: 10, message: "El celular no puede exceder los 10 dígitos" },
+                                    minLength: { value: 9, message: "El celular debe tener al menos 9 dígitos" }
+                                })}
                             />
                             {errors.celular && <p className="text-red-600 text-xs mt-1">{errors.celular.message}</p>}
                         </div>
@@ -59,13 +92,16 @@ export const Register = () => {
                         {/* Campo correo electrónico */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Correo institucional</label>
-                            <input type="email" placeholder="ejemplo@epn.edu.ec" className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400" 
-                            {...register("email", { required: "El correo electrónico es obligatorio" })}
+                            <input 
+                                type="email" 
+                                placeholder="ejemplo@epn.edu.ec" 
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400" 
+                                {...register("email", { required: "El correo electrónico es obligatorio" })}
                             />
                             {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
                         </div>
 
-                        {/* Campo Rol del Sistema (Obligatorio para el Backend) */}
+                        {/* Campo Rol del Sistema */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Tipo de Usuario (Rol)</label>
                             <select 
@@ -103,8 +139,10 @@ export const Register = () => {
 
                         {/* Botón enviar */}
                         <div>
-                            <button className="bg-gray-600 text-white py-2 w-full rounded-md mt-4 font-semibold shadow-md hover:bg-gray-700 transition duration-300"
-                            disabled={loading}>
+                            <button 
+                                className="bg-gray-600 text-white py-2 w-full rounded-md mt-4 font-semibold shadow-md hover:bg-gray-700 transition duration-300"
+                                disabled={loading}
+                            >
                                 {loading ? "Procesando..." : "Registrarse"}
                             </button>
                         </div>

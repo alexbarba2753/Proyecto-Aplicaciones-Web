@@ -1,14 +1,13 @@
 import { create } from "zustand"
 import axios from "axios"
+import { toast } from "react-toastify"
 
 // Función auxiliar para obtener las cabeceras de autenticación seguras
 const getAuthHeaders = () => {
-    // Buscamos el token en el localStorage con la clave exacta que maneja Zustand
     const storedUser = JSON.parse(localStorage.getItem("auth-token"))
     return {
         headers: {
             "Content-Type": "application/json",
-            // Apunta al token guardado dentro del estado global
             Authorization: `Bearer ${storedUser?.state?.token}`,
         },
     }
@@ -24,15 +23,36 @@ const storeProfile = create((set) => ({
     // Función asíncrona para traer los datos desde el backend institucional
     profile: async () => {
         try {
-            // 🎓 ADAPTADO: Apunta a la ruta real usando la base de tu .env
             const url = `${import.meta.env.VITE_BACKEND_URL}/usuario/perfil`
-            
             const respuesta = await axios.get(url, getAuthHeaders())
-            
-            // Guardamos la información del estudiante/usuario en el estado global
             set({ user: respuesta.data })
         } catch (error) {
             console.error("Error al obtener el perfil del usuario:", error)
+        }
+    },
+
+    // Función para actualizar los datos desde los formularios
+    updateProfile: async (url, data) => {
+        try {
+            const respuesta = await axios.put(url, data, getAuthHeaders())
+            set({ user: respuesta.data })
+            toast.success("Perfil actualizado correctamente")
+        } catch (error) {
+            console.error(error)
+            toast.error(error.response?.data?.msg)
+        }
+    },
+
+    // 🎓 AÑADIDO: Función para cambiar la contraseña de forma segura
+    updatePasswordProfile: async (url, data) => {
+        try {
+            const respuesta = await axios.put(url, data, getAuthHeaders())
+            // Retorna la respuesta completa para que el formulario la maneje (por ejemplo, para hacer un reset de los inputs)
+            return respuesta
+        } catch (error) {
+            console.error(error)
+            // Lanza la alerta de error con el mensaje de tu backend si algo falla (ej: "Password actual incorrecto")
+            toast.error(error.response?.data?.msg)
         }
     }
 }))
