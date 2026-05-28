@@ -14,15 +14,20 @@ const Login = () => {
     const {setToken, setRol} = storeAuth()
 
     // Lógica de autenticación
-    const loginUser = async (dataForm) => {
-        // 🎓 CORREGIDO: Apunta al endpoint de tu backend (sin /veterinario)
-        const url = `${import.meta.env.VITE_BACKEND_URL}/login`
+   const loginUser = async (dataForm) => {
+
+        const url = `${import.meta.env.VITE_BACKEND_URL}/usuario/login`
+        
+        
         const response = await fetchDataBackend(url, dataForm, 'POST')
-        setToken(response.token)
-        setRol(response.rol)
+        
+        // Evaluamos estrictamente que la respuesta exista
         if (response) {
-            // El custom hook useFetch internamente ya guarda el token en el localStorage si lo configuraron así
+            setToken(response.token)
+            setRol(response.rol)
             navigate('/dashboard')
+        } else {
+            console.log("El backend no devolvió un token válido.")
         }
     }
 
@@ -121,7 +126,6 @@ const Login = () => {
 
                     {/* Enlace para olvidaste tu contraseña */}
                     <div className="mt-6 text-center text-sm border-t border-gray-100 pt-4">
-                        {/* 🎓 CORREGIDO: Removido el /id innecesario de la URL */}
                         <Link to="/forgot" className="text-slate-600 font-medium hover:underline">
                             ¿Olvidaste tu contraseña?
                         </Link>
