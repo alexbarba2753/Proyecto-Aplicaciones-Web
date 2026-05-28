@@ -2,7 +2,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-
+// Obtener la ruta absoluta del directorio actual
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -16,13 +16,13 @@ const swaggerOptions = {
         },
         servers: [
         {
-            
-            url: '/api',
-            description: 'Servidor Actual'
+            // Tu enlace real de Vercel apuntando al prefijo de tus rutas
+            url: 'https://proyecto-aplicaciones-web-chi.vercel.app/api',
+            description: 'Servidor de Producción (Vercel)'
         }
         ],
     },
-
+    // Busca con ruta absoluta la carpeta routers al lado de este archivo
     apis: [path.join(__dirname, './routers/*.js')], 
 };
 
