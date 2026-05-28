@@ -10,14 +10,14 @@ const swaggerOptions = {
         },
         servers: [
         {
-            // Reemplaza esto con tu link real de Vercel (el que termina en /api)
+            
             url: 'https://proyecto-aplicaciones-web-chi.vercel.app/api',
             description: 'Servidor de Producción (Vercel)'
         }
         ],
     },
-    // Le indicamos a Swagger que busque la documentación en tu carpeta de routers
-    apis: ['./src/routers/*.js', './backend/src/routers/*.js', './routers/*.js'], 
+    // Al usar './routers/*.js', Swagger buscará exactamente la carpeta local routers/ que tienes junto a server.js
+    apis: ['./routers/*.js'], 
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
