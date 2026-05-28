@@ -34,14 +34,14 @@ function App() {
           <Route path="/recuperarpassword/:token" element={<Reset />} />
         </Route>
 
-        {/* ✅ Dashboard como layout con hijos directos */}
+
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         }>
           <Route index element={null} />
-          <Route path="profile" element={<ProfileUser />} />  {/* 👈 /dashboard/profile */}
+          <Route path="profile" element={<ProfileUser />} />  
           <Route path="list"    element={<div>Lista</div>} />
           <Route path="create"  element={<div>Crear</div>} />
         </Route>

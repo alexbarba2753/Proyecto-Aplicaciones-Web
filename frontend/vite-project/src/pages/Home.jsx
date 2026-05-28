@@ -15,7 +15,7 @@ export const Home = () => {
                         <ul className='flex gap-8 justify-center text-sm font-semibold text-slate-600'>
                             <li><a href="#" className='hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-slate-800 hover:after:w-full after:transition-all'>Inicio</a></li>
                             <li><a href="https://esfot.epn.edu.ec/" target="_blank" rel="noreferrer" className='hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-slate-800 hover:after:w-full after:transition-all'>ESFOT</a></li>
-                            <li><a href="#" className='hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-slate-800 hover:after:w-full after:transition-all'>Ayuda</a></li>
+                            <li><a href="https://byronloarte.notion.site/S-labo-a25f2d27931e4eee8ade496643fc20cf" target="_blank" rel="noreferrer" className='hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-slate-800 hover:after:w-full after:transition-all'>Ayuda</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -53,8 +53,8 @@ export const Home = () => {
                     <div className="relative w-full max-w-md lg:max-w-full aspect-video lg:aspect-square bg-gradient-to-tr from-slate-200 to-slate-100 rounded-2xl border border-slate-300/60 p-2 shadow-xl shadow-slate-200/50 overflow-hidden group">
                         {/* Reemplaza la URL del src por tu asset final, ej: /img/hero-vector.png */}
                         <img 
-                            src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop" 
-                            alt="Ilustración de PraxisFlow Dashboard" 
+                            src="/images/esfot_2.jpg" 
+                            alt="Ilustración de PracticasPPoli Dashboard" 
                             className="w-full h-full object-cover rounded-xl grayscale-[20%] group-hover:grayscale-0 transition duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent pointer-events-none"></div>

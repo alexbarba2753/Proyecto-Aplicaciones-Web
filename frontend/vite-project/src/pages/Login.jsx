@@ -35,16 +35,22 @@ const Login = () => {
         <div className="flex flex-col sm:flex-row h-screen bg-gray-50 font-sans">
             <ToastContainer />
 
-            {/* Lado Izquierdo: Banner Corporativo de PraxisFlow (Reemplaza a doglogin.jpg) */}
-            <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-slate-800 to-slate-950 flex-col justify-center items-start p-12 text-white">
-                <div className="max-w-md mx-auto h-full flex flex-col justify-center">
-                    <span className="bg-slate-700 text-slate-300 text-xs uppercase px-3 py-1 rounded-full font-bold tracking-wider mb-4 w-max">
+            <div 
+                className="hidden sm:flex sm:w-1/2 relative flex-col justify-center items-start p-12 text-white bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: "url('/images/esfot_1.jpg')" }} 
+            >
+                {/* Capa de superposición suavizada: Deja ver la foto pero protege el texto blanco */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 via-slate-950/50 to-slate-950/70 z-0"></div>
+
+                {/* Contenido del Banner con sombra de texto integrada */}
+                <div className="max-w-md mx-auto h-full flex flex-col justify-center relative z-10 drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
+                    <span className="bg-slate-900/80 backdrop-blur-md text-slate-200 text-xs uppercase px-3 py-1.5 rounded-full font-bold tracking-wider mb-5 w-max border border-white/10">
                         Portal Institucional
                     </span>
-                    <h2 className="text-4xl font-extrabold mb-4 leading-tight">
-                        PraxisFlow
+                    <h2 className="text-4xl font-extrabold mb-4 leading-tight tracking-tight text-white drop-shadow-sm">
+                        PracticasPPoli
                     </h2>
-                    <p className="text-slate-400 text-lg">
+                    <p className="text-slate-100 text-lg leading-relaxed font-medium">
                         Inicia sesión para registrar tus bitácoras, gestionar el seguimiento de tus horas y validar tus prácticas preprofesionales ESFOT.
                     </p>
                 </div>
