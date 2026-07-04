@@ -4,10 +4,8 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import routerUser from './routers/user_routes.js'
 import routerAulas from './routers/aula_routes.js'
-
 import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './swagger.js'
-
 // Inicializaciones
 const app = express()
 dotenv.config()
@@ -33,13 +31,10 @@ app.use('/api',routerUser)
 // Esto hará que la documentación sea accesible en la raíz del backend /api-docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-// Manejo de una ruta que no sea encontrada 
-=======
 // Rutas para aulas virtuales
 app.use('/api',routerAulas)
 
 // Manejo de una ruta que no sea encontrada
->>>>>>> 8a223eb (Agregar gestión de aulas)
 app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
 
 
