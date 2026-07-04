@@ -8,6 +8,9 @@ import { Forgot } from './pages/Forgot'
 import { Reset } from './pages/Reset'
 import Dashboard from './layout/Dashboard'
 import ProfileUser from './pages/ProfileUser'   
+import AulasLista from './pages/AulasLista'
+import AulaDetalle from './pages/AulaDetalle'
+import AulaCrear from './pages/AulaCrear'
 import PublicRoute from './routes/PublicRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
 import storeAuth from './context/storeAuth'
@@ -41,9 +44,10 @@ function App() {
           </ProtectedRoute>
         }>
           <Route index element={null} />
-          <Route path="profile" element={<ProfileUser />} />  {/* 👈 /dashboard/profile */}
-          <Route path="list"    element={<div>Lista</div>} />
-          <Route path="create"  element={<div>Crear</div>} />
+          <Route path="profile" element={<ProfileUser />} />
+          <Route path="aulas" element={<AulasLista />} />
+          <Route path="aulas/crear" element={<AulaCrear />} />
+          <Route path="aulas/:id" element={<AulaDetalle />} />
         </Route>
 
       </Routes>

@@ -26,7 +26,13 @@ const registro = async (req, res) => {
             return res.status(400).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
         }
         
-        // [PASO 4]: INSTANCIAR EL NUEVO USUARIO
+        // [PASO 4]: NORMALIZAR EL ROL A MINÚSCULAS
+        // Aseguramos consistencia independientemente de cómo llegue del formulario
+        if (req.body.rol) {
+            req.body.rol = req.body.rol.toLowerCase().trim();
+        }
+
+        // [PASO 5]: INSTANCIAR EL NUEVO USUARIO
         // Creamos un nuevo documento en memoria RAM usando la estructura de nuestro Usuario Schema
         const nuevoUsuario = new Usuario(req.body);
         
@@ -249,10 +255,13 @@ const login = async (req, res) => {
         
         // [PASO 6]: PREPARAR DATOS DE SESIÓN
         // Desestructuramos el objeto.
-        const { nombre, apellido, direccion, celular, _id, rol } = usuarioBDD;
+        const { nombre, apellido, direccion, celular, _id } = usuarioBDD;
+
+        // Normalizamos el rol a minúsculas para compatibilidad con cuentas antiguas
+        const rol = usuarioBDD.rol?.toLowerCase().trim() || 'estudiante';
 
         // Generamos un token JWT que incluye el ID y el rol del usuario, usando la función que creamos en el middleware de JWT.
-        const token = crearTokenJWT(usuarioBDD._id, usuarioBDD.rol);
+        const token = crearTokenJWT(usuarioBDD._id, rol);
 
         // [PASO 7]: RESPUESTA EXITOSA
         // Devolvemos los datos limpios para que guarde el perfil en su estado global.

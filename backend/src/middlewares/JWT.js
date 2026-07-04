@@ -43,7 +43,11 @@ const verificarTokenJWT = async (req, res, next) => {
         // [PASO 5]: INYECCIÓN DE DATOS
         // Guardamos el objeto limpio del usuario directamente dentro de la petición ('req.usuario')
         // De esta manera, cualquier controlador que venga después podrá saber quién está navegando con solo leer 'req.usuario'
-        req.usuario = usuarioBDD
+        // Normalizamos el rol a minúsculas para compatibilidad con cuentas existentes
+        req.usuario = {
+            ...usuarioBDD,
+            rol: usuarioBDD.rol?.toLowerCase().trim() || 'estudiante'
+        }
         
         // [PASO 6]: LUZ VERDE
         // El guardia se hace a un lado y permite que Express continúe hacia el controlador final de la ruta
@@ -56,8 +60,33 @@ const verificarTokenJWT = async (req, res, next) => {
     }
 }
 
-// EXPORTACIÓN: Exportamos ambas herramientas de seguridad
+/**
+ * MIDDLEWARE: Verifica que el usuario autenticado tenga uno de los roles permitidos.
+ * Se usa DESPUÉS de verificarTokenJWT para control de acceso granular.
+ * @param  {...string} rolesPermitidos - Lista de roles que pueden acceder (ej: 'docente', 'estudiante')
+ */
+const verificarRol = (...rolesPermitidos) => {
+    return (req, res, next) => {
+        // Si por alguna razón no hay usuario en la request (no pasó por verificarTokenJWT)
+        if (!req.usuario) {
+            return res.status(401).json({ msg: "Acceso denegado: usuario no autenticado" })
+        }
+
+        // Comparamos el rol del usuario contra la whitelist de roles permitidos
+        if (!rolesPermitidos.includes(req.usuario.rol)) {
+            return res.status(403).json({ 
+                msg: `Acceso denegado: se requiere rol de ${rolesPermitidos.join(' o ')}` 
+            })
+        }
+
+        // Si el rol está en la lista, dejamos pasar
+        next()
+    }
+}
+
+// EXPORTACIÓN: Exportamos las tres herramientas de seguridad
 export { 
     crearTokenJWT,
-    verificarTokenJWT 
+    verificarTokenJWT,
+    verificarRol
 }

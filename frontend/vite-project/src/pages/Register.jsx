@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { MdVisibility, MdVisibilityOff } from "react-icons/md"
-import { Link } from "react-router-dom" 
+import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { ToastContainer } from 'react-toastify' // Manteniendo Toastify aquí mismo
 import { useFetch } from "../hooks/useFetch"
@@ -9,7 +9,7 @@ export const Register = () => {
     const [showPassword, setShowPassword] = useState(false)
     const { fetchDataBackend, loading } = useFetch()
     const { register, handleSubmit, formState: { errors } } = useForm()
-    
+
     const registerUser = async (dataForm) => {
         const url = `${import.meta.env.VITE_BACKEND_URL}/registro`
         await fetchDataBackend(url, dataForm, "POST")
@@ -26,18 +26,18 @@ export const Register = () => {
                     <h1 className="text-3xl font-semibold mb-2 text-center uppercase text-gray-600">PracticasPPoli</h1>
                     <small className="text-gray-400 block my-4 text-sm text-center">
                         Formulario de Registro - Control de Prácticas ESFOT
-                    </small> 
-                    
+                    </small>
+
                     <form onSubmit={handleSubmit(registerUser)} className="space-y-3">
-                        
+
                         {/* Campo nombre */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Nombre</label>
-                            <input 
-                                type="text" 
-                                placeholder="Ingresa tu nombre" 
+                            <input
+                                type="text"
+                                placeholder="Ingresa tu nombre"
                                 className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
-                                {...register("nombre", { 
+                                {...register("nombre", {
                                     required: "El nombre es obligatorio",
                                     pattern: {
                                         value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
@@ -52,11 +52,11 @@ export const Register = () => {
                         {/* Campo apellido */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Apellido</label>
-                            <input 
-                                type="text" 
-                                placeholder="Ingresa tu apellido" 
+                            <input
+                                type="text"
+                                placeholder="Ingresa tu apellido"
                                 className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
-                                {...register("apellido", { 
+                                {...register("apellido", {
                                     required: "El apellido es obligatorio",
                                     pattern: {
                                         value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
@@ -71,12 +71,12 @@ export const Register = () => {
                         {/* Campo celular */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Celular</label>
-                            <input 
-                                type="text" 
-                                inputMode="tel" 
-                                placeholder="Ej: 0987654321" 
+                            <input
+                                type="text"
+                                inputMode="tel"
+                                placeholder="Ej: 0987654321"
                                 className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
-                                {...register("celular", { 
+                                {...register("celular", {
                                     required: "El celular es obligatorio",
                                     pattern: {
                                         value: /^[0-9]+$/,
@@ -92,10 +92,10 @@ export const Register = () => {
                         {/* Campo correo electrónico */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Correo institucional</label>
-                            <input 
-                                type="email" 
-                                placeholder="ejemplo@epn.edu.ec" 
-                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400" 
+                            <input
+                                type="email"
+                                placeholder="ejemplo@epn.edu.ec"
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
                                 {...register("email", { required: "El correo electrónico es obligatorio" })}
                             />
                             {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
@@ -104,13 +104,13 @@ export const Register = () => {
                         {/* Campo Rol del Sistema */}
                         <div>
                             <label className="mb-1 block text-sm font-semibold text-gray-700">Tipo de Usuario (Rol)</label>
-                            <select 
+                            <select
                                 className="block w-full rounded-md border border-gray-300 py-1.5 px-3 bg-white text-gray-600 focus:outline-gray-400"
                                 {...register("rol", { required: "Debes seleccionar tu rol institucional" })}
                             >
                                 <option value="">-- Selecciona tu Rol --</option>
                                 <option value="Estudiante">Estudiante</option>
-                                <option value="Tutor">Tutor Académico</option>
+                                <option value="Docente">Docente</option>
                                 <option value="Supervisor">Supervisor de Prácticas</option>
                             </select>
                             {errors.rol && <p className="text-red-600 text-xs mt-1">{errors.rol.message}</p>}
@@ -139,7 +139,7 @@ export const Register = () => {
 
                         {/* Botón enviar */}
                         <div>
-                            <button 
+                            <button
                                 className="bg-gray-600 text-white py-2 w-full rounded-md mt-4 font-semibold shadow-md hover:bg-gray-700 transition duration-300"
                                 disabled={loading}
                             >
