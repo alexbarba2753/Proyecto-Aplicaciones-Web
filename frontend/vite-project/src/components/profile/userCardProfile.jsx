@@ -27,6 +27,12 @@ export const UserCardProfile = () => {
             {/* Lista de Campos de Datos */}
             <div className="w-full space-y-4 text-sm">
                 
+                {/* Campo Cédula */}
+                <div className="flex flex-col border-b border-slate-800/60 pb-2">
+                    <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Cédula</span>
+                    <p className="text-slate-200 font-medium mt-0.5">{user?.cedula || "—"}</p>
+                </div>
+
                 {/* Campo Nombre */}
                 <div className="flex flex-col border-b border-slate-800/60 pb-2">
                     <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Nombre</span>

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { ToastContainer, toast } from 'react-toastify'
 import { useFetch } from "../hooks/useFetch"
 import storeAuth from "../context/storeAuth"
+import storeProfile from "../context/userProfile"
 import axios from "axios"
 
 export const CompletarPerfil = () => {
@@ -12,6 +13,7 @@ export const CompletarPerfil = () => {
     const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm()
     const navigate = useNavigate()
     const { token, setRol } = storeAuth()
+    const { profile } = storeProfile()
 
     useEffect(() => {
         if (!token) {
@@ -30,6 +32,9 @@ export const CompletarPerfil = () => {
             if (response.rol) {
                 setRol(response.rol)
             }
+            // 🎓 Forzamos a que vuelva a descargar la info del usuario
+            await profile()
+            
             toast.success("Perfil completado. Redirigiendo al Dashboard...")
             setTimeout(() => {
                 navigate('/dashboard')
