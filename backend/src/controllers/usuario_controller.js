@@ -70,30 +70,30 @@ const registro = async (req, res) => {
         const nuevoUsuario = new Usuario(req.body);
         
         // [PASO 6]: ENCRIPTAR CONTRASEÑA
-        // Llamamos al método asíncrono del modelo para transformar la clave en texto plano a un hash seguro de bcrypt
         nuevoUsuario.password = await nuevoUsuario.encryptPassword(password);
         
         // [PASO 7]: GENERAR TOKEN TEMPORAL
-        // Creamos la cadena aleatoria para la verificación del correo
         const token = nuevoUsuario.createToken();
         
-        // [PASO 8]: ENVIAR NOTIFICACIÓN POR CORREO
-        // Disparamos el correo llevando el token en el enlace de confirmación
-        await sendMailToRegister(email, token);
-        
-        // [PASO 9]: GUARDAR EN BASE DE DATOS
-        // Impactamos finalmente la base de datos MongoDB local guardando permanentemente el nuevo usuario
+        // [PASO 8]: GUARDAR EN BASE DE DATOS PRIMERO
+        // Guardamos ANTES de enviar el correo para que el registro sea rápido
         await nuevoUsuario.save();
         
-        // [PASO 10]: RESPUESTA EXITOSA Al FRONTEND
-        // Si todo salió bien hasta aquí, respondemos al usuario con un estado 200 (OK)
+        // [PASO 9]: RESPUESTA INMEDIATA AL FRONTEND
+        // Respondemos al usuario lo más rápido posible para evitar timeout en Render
         res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
 
         // ═══════════════════════════════════════════════════════
-        // 🆕 [PASO 11]: GENERAR AVATAR CON IA EN SEGUNDO PLANO
-        // Se ejecuta DESPUÉS de responder al usuario para evitar timeouts en Render.
-        // Si falla, el usuario queda sin foto pero el registro ya fue exitoso.
+        // [PASO 10]: TAREAS EN SEGUNDO PLANO (después de responder)
+        // Se ejecutan DESPUÉS de responder para evitar timeouts.
         // ═══════════════════════════════════════════════════════
+        
+        // Enviar correo de confirmación (segundo plano)
+        sendMailToRegister(email, token).catch(err => {
+            console.error("❌ Error enviando correo de registro:", err.message);
+        });
+
+        // Generar avatar con IA (segundo plano)
         generarAvatarIA(nuevoUsuario._id.toString()).then(avatarUrl => {
             if (avatarUrl) {
                 Usuario.findByIdAndUpdate(nuevoUsuario._id, { perfil: avatarUrl }).catch(err => {
