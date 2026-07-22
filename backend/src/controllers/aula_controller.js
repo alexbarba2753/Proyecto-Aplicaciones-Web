@@ -41,6 +41,8 @@ const crearAula = async (req, res) => {
         // Usamos el método estático del Schema que garantiza unicidad en la BDD
         const codigoAcceso = await Aula.generarCodigoUnico()
 
+
+
         // [PASO 7]: CREAR EL DOCUMENTO EN MEMORIA
         const nuevaAula = new Aula({
             nombre: nombre.trim(),
