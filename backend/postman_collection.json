@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "Sistema Prácticas ESFOT - API Completa",
+    "description": "Colección completa de endpoints del Sistema de Gestión de Prácticas Preprofesionales ESFOT-EPN.\n\nSprints 1 y 2: Gestión de Usuarios + Aulas Virtuales.\n\n**Instrucciones:**\n1. Configura la variable `baseUrl` en el entorno de Postman (ej: http://localhost:3000/api)\n2. Para rutas protegidas, primero ejecuta el Login y copia el token\n3. El token va en el header: Authorization: Bearer <token>",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Sprint 1 — Gestión de Usuarios",
+      "item": [
+        {
+          "name": "Registro de Usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez García\",\n  \"email\": \"juan.perez@epn.edu.ec\",\n  \"password\": \"MiClave123\",\n  \"cedula\": \"1712345678\",\n  \"rol\": \"estudiante\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/registro", "host": ["{{baseUrl}}"], "path": ["registro"] },
+            "description": "Registra un nuevo usuario. Valida la cédula con EcuadorAPI, genera avatar con IA y lo sube a Cloudinary. Envía correo de confirmación.\n\n**No requiere autenticación.**"
+          }
+        },
+        {
+          "name": "Confirmar Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/confirmar/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["confirmar", ":token"],
+              "variable": [{ "key": "token", "value": "PEGAR_TOKEN_DEL_CORREO_AQUI" }]
+            },
+            "description": "Confirma la cuenta del usuario mediante el token del correo electrónico.\n\n**No requiere autenticación.**"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan.perez@epn.edu.ec\",\n  \"password\": \"MiClave123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/usuario/login", "host": ["{{baseUrl}}"], "path": ["usuario", "login"] },
+            "description": "Autentica con email y contraseña. Devuelve JWT válido por 1 día + datos del perfil.\n\n**No requiere autenticación.** Cuenta debe estar confirmada."
+          }
+        },
+        {
+          "name": "Solicitar Recuperación de Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan.perez@epn.edu.ec\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/recuperarpassword", "host": ["{{baseUrl}}"], "path": ["recuperarpassword"] },
+            "description": "Envía correo con enlace para restablecer la contraseña.\n\n**No requiere autenticación.**"
+          }
+        },
+        {
+          "name": "Comprobar Token de Recuperación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recuperarpassword/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["recuperarpassword", ":token"],
+              "variable": [{ "key": "token", "value": "PEGAR_TOKEN_AQUI" }]
+            },
+            "description": "Verifica que el token de recuperación sea válido.\n\n**No requiere autenticación.**"
+          }
+        },
+        {
+          "name": "Crear Nuevo Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NuevaClave456\",\n  \"confirmpassword\": \"NuevaClave456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nuevopassword/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["nuevopassword", ":token"],
+              "variable": [{ "key": "token", "value": "PEGAR_TOKEN_AQUI" }]
+            },
+            "description": "Establece nueva contraseña. Requiere token de recuperación válido.\n\n**No requiere autenticación.**"
+          }
+        },
+        {
+          "name": "📌 Ver Perfil (Protegida)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/usuario/perfil", "host": ["{{baseUrl}}"], "path": ["usuario", "perfil"] },
+            "description": "Devuelve datos del perfil del usuario autenticado.\n\n**🔒 Requiere JWT.**"
+          }
+        },
+        {
+          "name": "📌 Actualizar Perfil (Protegida)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Pérez Actualizado\",\n  \"direccion\": \"Av. Ladrón de Guevara E11-253\",\n  \"celular\": \"0991234567\",\n  \"email\": \"juan.perez@epn.edu.ec\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuario/actualizarperfil/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuario", "actualizarperfil", ":id"],
+              "variable": [{ "key": "id", "value": "PEGAR_ID_USUARIO_AQUI" }]
+            },
+            "description": "Actualiza nombre, apellido, dirección, celular, email.\n\n**🔒 Requiere JWT.**"
+          }
+        },
+        {
+          "name": "📌 Actualizar Password (Protegida)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"passwordactual\": \"MiClave123\",\n  \"passwordnuevo\": \"NuevaClave789\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuario/actualizarpassword/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuario", "actualizarpassword", ":id"],
+              "variable": [{ "key": "id", "value": "PEGAR_ID_USUARIO_AQUI" }]
+            },
+            "description": "Cambia la contraseña del usuario logueado. Requiere password actual.\n\n**🔒 Requiere JWT.**"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Sprint 2 — Aulas Virtuales",
+      "item": [
+        {
+          "name": "📌 Crear Aula (Solo Docente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prácticas Software 2025-A\",\n  \"empresa\": \"Banco Pichincha\",\n  \"descripcion\": \"Grupo de prácticas del semestre 2025-A\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/aulas", "host": ["{{baseUrl}}"], "path": ["aulas"] },
+            "description": "Crea una nueva aula virtual con código de acceso único de 6 caracteres.\n\n**🔒 Requiere JWT + Rol: docente**"
+          }
+        },
+        {
+          "name": "📌 Listar Mis Aulas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/aulas", "host": ["{{baseUrl}}"], "path": ["aulas"] },
+            "description": "Lista aulas del usuario. Docente: aulas creadas. Estudiante: aulas inscritas.\n\n**🔒 Requiere JWT.**"
+          }
+        },
+        {
+          "name": "📌 Detalle de un Aula",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/aulas/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["aulas", ":id"],
+              "variable": [{ "key": "id", "value": "PEGAR_ID_AULA_AQUI" }]
+            },
+            "description": "Detalle completo del aula con docente y estudiantes populados.\n\n**🔒 Requiere JWT** (miembro del aula)."
+          }
+        },
+        {
+          "name": "📌 Actualizar Aula (Solo Docente Propietario)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prácticas Software 2025-A (Actualizado)\",\n  \"empresa\": \"Banco Pichincha S.A.\",\n  \"descripcion\": \"Descripción actualizada\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/aulas/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["aulas", ":id"],
+              "variable": [{ "key": "id", "value": "PEGAR_ID_AULA_AQUI" }]
+            },
+            "description": "Actualiza nombre, empresa y descripción del aula.\n\n**🔒 Requiere JWT + Rol: docente** (propietario)."
+          }
+        },
+        {
+          "name": "📌 Archivar Aula — Soft Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/aulas/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["aulas", ":id"],
+              "variable": [{ "key": "id", "value": "PEGAR_ID_AULA_AQUI" }]
+            },
+            "description": "Archiva un aula (estado = false). No elimina el documento.\n\n**🔒 Requiere JWT + Rol: docente** (propietario)."
+          }
+        },
+        {
+          "name": "📌 Unirse a Aula con Código (Solo Estudiante)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoAcceso\": \"ABC123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/aulas/unirse", "host": ["{{baseUrl}}"], "path": ["aulas", "unirse"] },
+            "description": "Permite a un estudiante unirse a un aula con código de 6 caracteres.\n\n**🔒 Requiere JWT + Rol: estudiante**"
+          }
+        }
+      ]
+    }
+  ]
+}

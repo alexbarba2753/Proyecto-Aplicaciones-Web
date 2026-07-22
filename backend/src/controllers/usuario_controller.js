@@ -2,16 +2,27 @@
 import Usuario from "../models/Usuario.js";
 import { sendMailToRegister, sendMailToRecoveryPassword } from "../helpers/sendMail.js";
 import { crearTokenJWT } from "../middlewares/JWT.js";
+import { validarCedulaEcuador } from "../helpers/validarCedula.js";
+import { generarAvatarIA } from "../helpers/generateAvatar.js";
 import mongoose from "mongoose"
 
 /**
  * Maneja el registro de nuevos usuarios (Estudiantes, Docentes, Tutores)
+ * 
+ * Flujo Sprint 3:
+ * 1. Validar campos vacíos
+ * 2. Validar email duplicado
+ * 3. 🆕 Validar cédula con EcuadorAPI (prellenar nombre/apellido con datos reales)
+ * 4. 🆕 Generar avatar con IA (Hugging Face → Cloudinary)
+ * 5. Encriptar password + crear token de confirmación
+ * 6. Enviar correo de confirmación
+ * 7. Guardar en MongoDB
  */
 const registro = async (req, res) => {
 
     try {
         // [PASO 1]: Extraemos el email y password del cuerpo de la petición (lo que viene del formulario)
-        const { email, password } = req.body;
+        const { email, password, cedula } = req.body;
         
         // [PASO 2]: VALIDACIÓN DE CAMPOS VACÍOS
         // Convertimos el objeto req.body en un arreglo de valores y verificamos si alguno es un texto vacío ("")
@@ -25,6 +36,36 @@ const registro = async (req, res) => {
         if (verificarEmailBDD) {
             return res.status(400).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
         }
+
+        // ═══════════════════════════════════════════════════════
+        // 🆕 [PASO 3.5]: VALIDAR CÉDULA CON ECUADORAPI
+        // Obligatorio en registro local. Verifica que la persona exista en el Registro Civil.
+        // ═══════════════════════════════════════════════════════
+        
+        if (!cedula) {
+            return res.status(400).json({ msg: "La cédula es obligatoria para el registro" });
+        }
+
+        // Verificar que la cédula no esté ya registrada en otro usuario
+        const cedulaExistente = await Usuario.findOne({ cedula });
+        if (cedulaExistente) {
+            return res.status(400).json({ msg: "La cédula ya se encuentra registrada en otro usuario" });
+        }
+
+        let datosRegistroCivil;
+        try {
+            datosRegistroCivil = await validarCedulaEcuador(cedula);
+        } catch (errorCedula) {
+            return res.status(400).json({ msg: errorCedula.message || "La cédula no es válida o no existe en el registro civil" });
+        }
+
+        // Si EcuadorAPI devolvió nombres reales, los usamos para prellenar (garantiza datos verídicos)
+        if (datosRegistroCivil.nombre) {
+            req.body.nombre = datosRegistroCivil.nombre;
+        }
+        if (datosRegistroCivil.apellido) {
+            req.body.apellido = datosRegistroCivil.apellido;
+        }
         
         // [PASO 4]: NORMALIZAR EL ROL A MINÚSCULAS
         // Aseguramos consistencia independientemente de cómo llegue del formulario
@@ -35,24 +76,35 @@ const registro = async (req, res) => {
         // [PASO 5]: INSTANCIAR EL NUEVO USUARIO
         // Creamos un nuevo documento en memoria RAM usando la estructura de nuestro Usuario Schema
         const nuevoUsuario = new Usuario(req.body);
+
+        // ═══════════════════════════════════════════════════════
+        // 🆕 [PASO 5.5]: GENERAR AVATAR CON IA Y SUBIR A CLOUDINARY
+        // Genera una imagen única con Hugging Face y la aloja en Cloudinary.
+        // Si falla, el registro continúa normalmente (graceful degradation).
+        // ═══════════════════════════════════════════════════════
         
-        // [PASO 5]: ENCRIPTAR CONTRASEÑA
+        const avatarUrl = await generarAvatarIA(nuevoUsuario._id.toString());
+        if (avatarUrl) {
+            nuevoUsuario.perfil = avatarUrl;
+        }
+        
+        // [PASO 6]: ENCRIPTAR CONTRASEÑA
         // Llamamos al método asíncrono del modelo para transformar la clave en texto plano a un hash seguro de bcrypt
         nuevoUsuario.password = await nuevoUsuario.encryptPassword(password);
         
-        // [PASO 6]: GENERAR TOKEN TEMPORAL
+        // [PASO 7]: GENERAR TOKEN TEMPORAL
         // Creamos la cadena aleatoria para la verificación del correo
         const token = nuevoUsuario.createToken();
         
-        // [PASO 7]: ENVIAR NOTIFICACIÓN POR CORREO
+        // [PASO 8]: ENVIAR NOTIFICACIÓN POR CORREO
         // Disparamos el correo llevando el token en el enlace de confirmación
         await sendMailToRegister(email, token);
         
-        // [PASO 8]: GUARDAR EN BASE DE DATOS
+        // [PASO 9]: GUARDAR EN BASE DE DATOS
         // Impactamos finalmente la base de datos MongoDB local guardando permanentemente el nuevo usuario
         await nuevoUsuario.save();
         
-        // [PASO 9]: RESPUESTA EXITOSA Al FRONTEND
+        // [PASO 10]: RESPUESTA EXITOSA Al FRONTEND
         // Si todo salió bien hasta aquí, respondemos al usuario con un estado 200 (OK)
         res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
 
@@ -238,6 +290,11 @@ const login = async (req, res) => {
         if (!usuarioBDD) {
             return res.status(404).json({ msg: "El usuario no se encuentra registrado" });
         }
+
+        // 🆕 Verificar que el usuario no se haya registrado solo con Google (sin password local)
+        if (usuarioBDD.authProvider === 'google' && !usuarioBDD.password) {
+            return res.status(400).json({ msg: "Esta cuenta fue registrada con Google. Usa el botón 'Ingresar con Google' para iniciar sesión" });
+        }
         
         // [PASO 4]: VALIDACIÓN DE CUENTA VERIFICADA
         // Si el usuario no ha hecho clic en el enlace de confirmación que programamos antes, le negamos el acceso (Estado 403: Prohibido)
@@ -255,7 +312,7 @@ const login = async (req, res) => {
         
         // [PASO 6]: PREPARAR DATOS DE SESIÓN
         // Desestructuramos el objeto.
-        const { nombre, apellido, direccion, celular, _id } = usuarioBDD;
+        const { nombre, apellido, direccion, celular, _id, perfil } = usuarioBDD;
 
         // Normalizamos el rol a minúsculas para compatibilidad con cuentas antiguas
         const rol = usuarioBDD.rol?.toLowerCase().trim() || 'estudiante';
@@ -273,7 +330,8 @@ const login = async (req, res) => {
             direccion,
             celular,
             _id,
-            email: usuarioBDD.email
+            email: usuarioBDD.email,
+            perfil    // 🆕 Incluimos la URL de Cloudinary del avatar
         });
 
     } catch (error) {
@@ -371,6 +429,11 @@ const actualizarPassword = async (req, res) => {
         // Si por alguna razón extraña el usuario ya no existe en la base de datos
         if (!usuarioBDD) {
             return res.status(404).json({ msg: "Lo sentimos, el usuario no existe" });
+        }
+
+        // 🆕 Verificar que el usuario tenga contraseña local (no es usuario solo de Google)
+        if (usuarioBDD.authProvider === 'google' && !usuarioBDD.password) {
+            return res.status(400).json({ msg: "Tu cuenta fue registrada con Google y no tiene contraseña local para cambiar" });
         }
 
         // [PASO 2]: VERIFICAR LA CONTRASEÑA ACTUAL

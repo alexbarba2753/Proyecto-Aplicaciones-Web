@@ -31,8 +31,51 @@ const usuarioSchema = new Schema({
     },
     password:{
         type:String,
-        required:true
+        // Ya NO es required: true global.
+        // Se valida condicionalmente en el hook pre('validate')
+        // para permitir usuarios de Google OAuth sin contraseña local.
+        default:null
     },
+
+    // ═══════════════════════════════════════════════════════
+    // CAMPOS NUEVOS — Sprint 3: APIs Externas
+    // ═══════════════════════════════════════════════════════
+
+    // Cédula ecuatoriana (obligatoria solo en registro local)
+    cedula:{
+        type:String,
+        trim:true,
+        unique:true,
+        sparse:true,      // Permite múltiples documentos con null (usuarios Google)
+        default:null
+    },
+
+    // URL de la foto de perfil alojada en Cloudinary
+    // Ejemplo: "https://res.cloudinary.com/tu-cloud/image/upload/v123/avatares_esfot/avatar_abc123.png"
+    perfil:{
+        type:String,
+        default:null
+    },
+
+    // ID único de Google para usuarios que se autentican con OAuth
+    googleId:{
+        type:String,
+        unique:true,
+        sparse:true,       // Permite múltiples documentos con null (usuarios locales)
+        default:null
+    },
+
+    // Indica cómo se registró el usuario: 'local' (email/password) o 'google' (OAuth)
+    authProvider:{
+        type:String,
+        enum:['local', 'google'],
+        default:'local'
+    },
+
+    // ═══════════════════════════════════════════════════════
+    // CAMPOS EXISTENTES (Sprint 1 y 2)
+    // ═══════════════════════════════════════════════════════
+
     status:{
         type:Boolean,
         default:true
@@ -52,6 +95,18 @@ const usuarioSchema = new Schema({
 
 },{
     timestamps:true
+})
+
+
+// ═══════════════════════════════════════════════════════
+// HOOK: Validación condicional del password
+// Solo es obligatorio cuando el usuario se registra de forma local.
+// Los usuarios de Google OAuth no tienen contraseña en nuestro sistema.
+// ═══════════════════════════════════════════════════════
+usuarioSchema.pre('validate', function() {
+    if (this.authProvider === 'local' && !this.password) {
+        this.invalidate('password', 'La contraseña es obligatoria para registro local')
+    }
 })
 
 

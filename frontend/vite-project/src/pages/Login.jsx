@@ -118,11 +118,14 @@ const Login = () => {
                         <hr className="flex-1 border-gray-200" />
                     </div>
 
-                    {/* Botón Google */}
-                    <button className="w-full mt-4 flex items-center justify-center border border-gray-300 py-2 rounded-xl text-sm font-medium text-gray-600 transition duration-300 hover:bg-gray-50">
+                    {/* Botón Google — Redirige al flujo OAuth del backend */}
+                    <a
+                        href={`${import.meta.env.VITE_BACKEND_URL}/auth/google`}
+                        className="w-full mt-4 flex items-center justify-center border border-gray-300 py-2 rounded-xl text-sm font-medium text-gray-600 transition duration-300 hover:bg-gray-50"
+                    >
                         <img className="w-5 mr-2" src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google Logo" />
                         Ingresar con Google institucional
-                    </button>
+                    </a>
 
                     {/* Enlace para olvidaste tu contraseña */}
                     <div className="mt-6 text-center text-sm border-t border-gray-100 pt-4">

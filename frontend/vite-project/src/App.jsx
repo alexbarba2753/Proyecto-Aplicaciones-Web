@@ -11,6 +11,7 @@ import ProfileUser from './pages/ProfileUser'
 import AulasLista from './pages/AulasLista'
 import AulaDetalle from './pages/AulaDetalle'
 import AulaCrear from './pages/AulaCrear'
+import GoogleCallbackPage from './pages/GoogleCallbackPage'
 import PublicRoute from './routes/PublicRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
 import storeAuth from './context/storeAuth'
@@ -27,6 +28,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* 🆕 Ruta de callback de Google OAuth (fuera de PublicRoute/ProtectedRoute) */}
+        <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 
         <Route element={<PublicRoute />}>
           <Route index element={<Home />} />
