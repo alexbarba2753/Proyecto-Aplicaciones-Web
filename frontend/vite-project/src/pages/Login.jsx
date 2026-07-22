@@ -35,14 +35,21 @@ const Login = () => {
         <div className="flex flex-col sm:flex-row h-screen bg-gray-50 font-sans">
             <ToastContainer />
 
-            {/* Lado Izquierdo: Banner Corporativo de PraxisFlow (Reemplaza a doglogin.jpg) */}
-            <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-slate-800 to-slate-950 flex-col justify-center items-start p-12 text-white">
-                <div className="max-w-md mx-auto h-full flex flex-col justify-center">
-                    <span className="bg-slate-700 text-slate-300 text-xs uppercase px-3 py-1 rounded-full font-bold tracking-wider mb-4 w-max">
+            {/* Lado Izquierdo: Banner Corporativo de PracticasPPoli (Reemplaza a doglogin.jpg) */}
+            <div 
+                className="hidden sm:flex sm:w-1/2 flex-col justify-center items-start p-12 text-white relative"
+                style={{ 
+                    backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.95)), url(/images/Esfot_facultad.jpg)', 
+                    backgroundSize: 'cover', 
+                    backgroundPosition: 'center' 
+                }}
+            >
+                <div className="max-w-md mx-auto h-full flex flex-col justify-center relative z-10">
+                    <span className="bg-slate-700/80 backdrop-blur-sm text-slate-200 text-xs uppercase px-3 py-1 rounded-full font-bold tracking-wider mb-4 w-max border border-slate-600/50">
                         Portal Institucional
                     </span>
                     <h2 className="text-4xl font-extrabold mb-4 leading-tight">
-                        PraxisFlow
+                        PracticasPPoli
                     </h2>
                     <p className="text-slate-400 text-lg">
                         Inicia sesión para registrar tus bitácoras, gestionar el seguimiento de tus horas y validar tus prácticas preprofesionales ESFOT.

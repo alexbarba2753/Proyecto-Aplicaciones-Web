@@ -27,7 +27,7 @@ const Dashboard = () => {
                     {/* Título del Sistema */}
                     <div className="mb-6 px-2">
                         <h2 className="text-2xl font-extrabold tracking-wide bg-gradient-to-r from-slate-100 to-slate-400 bg-clip-text text-transparent">
-                            PraxisFlow
+                            PracticasPPoli
                         </h2>
                         <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">
                             Panel de Control

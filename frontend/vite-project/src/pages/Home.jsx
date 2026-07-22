@@ -53,11 +53,11 @@ export const Home = () => {
                     <div className="relative w-full max-w-md lg:max-w-full aspect-video lg:aspect-square bg-gradient-to-tr from-slate-200 to-slate-100 rounded-2xl border border-slate-300/60 p-2 shadow-xl shadow-slate-200/50 overflow-hidden group">
                         {/* Reemplaza la URL del src por tu asset final, ej: /img/hero-vector.png */}
                         <img 
-                            src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop" 
-                            alt="Ilustración de PraxisFlow Dashboard" 
-                            className="w-full h-full object-cover rounded-xl grayscale-[20%] group-hover:grayscale-0 transition duration-500"
+                            src="/images/Esfot_logo.png" 
+                            alt="Logo ESFOT PracticasPPoli" 
+                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-500 drop-shadow-xl"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/10 to-transparent pointer-events-none"></div>
                     </div>
                 </div>
             </main>

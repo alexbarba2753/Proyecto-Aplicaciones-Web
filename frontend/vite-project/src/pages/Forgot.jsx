@@ -72,7 +72,7 @@ export const Forgot = () => {
             <div className="w-full sm:w-1/2 h-1/3 sm:h-screen bg-gradient-to-br from-slate-800 to-slate-950 flex flex-col justify-center items-center text-white p-12 sm:block hidden">
                 <div className="h-full flex flex-col justify-center items-start max-w-md mx-auto">
                     <span className="bg-slate-700 text-slate-300 text-xs uppercase px-3 py-1 rounded-full font-bold tracking-wider mb-4">
-                        PraxisFlow
+                        PracticasPPoli
                     </span>
                     <h2 className="text-4xl font-extrabold mb-4 leading-tight">
                         Sistema de Gestión de Prácticas Preprofesionales
