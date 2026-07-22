@@ -1,6 +1,6 @@
-import UserCardProfile from "../components/profile/UserCardProfile"
-import UserFormularioPerfil from "../components/profile/UserFormProfile"
-import UserCardPassword from "../components/profile/UserCardPassword"
+import UserCardProfile from "../components/profile/userCardProfile"
+import UserFormularioPerfil from "../components/profile/userFormProfile"
+import UserCardPassword from "../components/profile/userCardPassword"
 
 const ProfileUser = () => {
     return (
