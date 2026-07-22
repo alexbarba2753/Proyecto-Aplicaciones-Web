@@ -42,7 +42,7 @@ export const UserCardProfile = () => {
                 {/* Campo Dirección */}
                 <div className="flex flex-col border-b border-slate-800/60 pb-2">
                     <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Dirección</span>
-                    <p className="text-slate-300 font-medium mt-0.5">{user?.direccion || "—"}</p>
+                    <p className="text-slate-300 font-medium mt-0.5 break-words">{user?.direccion || "—"}</p>
                 </div>
 
                 {/* Campo Celular */}

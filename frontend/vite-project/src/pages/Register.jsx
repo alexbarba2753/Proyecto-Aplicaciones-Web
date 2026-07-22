@@ -9,6 +9,7 @@ import axios from "axios"
 export const Register = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [verifyingCedula, setVerifyingCedula] = useState(false)
+    const [isVerified, setIsVerified] = useState(false)
     const { fetchDataBackend, loading } = useFetch()
     const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm()
 
@@ -37,6 +38,7 @@ export const Register = () => {
                 setValue("apellido", response.data.apellido, { shouldValidate: true })
             }
             
+            setIsVerified(true)
             toast.success("Cédula verificada con éxito")
         } catch (error) {
             toast.error(error.response?.data?.msg || "Error al verificar la cédula")
@@ -73,7 +75,8 @@ export const Register = () => {
                                         pattern: {
                                             value: /^[0-9]{10}$/,
                                             message: "La cédula debe tener exactamente 10 dígitos numéricos"
-                                        }
+                                        },
+                                        onChange: () => setIsVerified(false)
                                     })}
                                 />
                                 <button
@@ -94,14 +97,16 @@ export const Register = () => {
                             <input
                                 type="text"
                                 placeholder="Ingresa tu nombre"
-                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                readOnly={isVerified}
+                                className={`block w-full rounded-md border border-gray-300 py-1.5 px-3 focus:outline-gray-400 ${isVerified ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'text-gray-600'}`}
                                 {...register("nombre", {
                                     required: "El nombre es obligatorio",
                                     pattern: {
                                         value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
                                         message: "El nombre solo puede contener letras y espacios"
                                     },
-                                    minLength: { value: 2, message: "El nombre debe tener al menos 2 caracteres" }
+                                    minLength: { value: 2, message: "El nombre debe tener al menos 2 caracteres" },
+                                    maxLength: { value: 15, message: "El nombre no puede exceder los 15 caracteres" }
                                 })}
                             />
                             {errors.nombre && <p className="text-red-600 text-xs mt-1">{errors.nombre.message}</p>}
@@ -113,14 +118,16 @@ export const Register = () => {
                             <input
                                 type="text"
                                 placeholder="Ingresa tu apellido"
-                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                readOnly={isVerified}
+                                className={`block w-full rounded-md border border-gray-300 py-1.5 px-3 focus:outline-gray-400 ${isVerified ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'text-gray-600'}`}
                                 {...register("apellido", {
                                     required: "El apellido es obligatorio",
                                     pattern: {
                                         value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
                                         message: "El apellido solo puede contener letras y espacios"
                                     },
-                                    minLength: { value: 2, message: "El apellido debe tener al menos 2 caracteres" }
+                                    minLength: { value: 2, message: "El apellido debe tener al menos 2 caracteres" },
+                                    maxLength: { value: 15, message: "El apellido no puede exceder los 15 caracteres" }
                                 })}
                             />
                             {errors.apellido && <p className="text-red-600 text-xs mt-1">{errors.apellido.message}</p>}
@@ -186,8 +193,11 @@ export const Register = () => {
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    onMouseDown={() => setShowPassword(true)}
+                                    onMouseUp={() => setShowPassword(false)}
+                                    onMouseLeave={() => setShowPassword(false)}
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
+                                    title="Mantén presionado para ver la contraseña"
                                 >
                                     {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
                                 </button>

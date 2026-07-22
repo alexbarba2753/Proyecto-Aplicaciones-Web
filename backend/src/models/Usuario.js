@@ -6,16 +6,19 @@ const usuarioSchema = new Schema({
     nombre:{
         type:String,
         required:true,
-        trim:true
+        trim:true,
+        maxlength: 15
     },
     apellido:{
         type:String,
         required:true,
-        trim:true
+        trim:true,
+        maxlength: 15
     },
     direccion:{
         type:String,
         trim:true,
+        maxlength: 40,
         default:null
     },
     celular:{
@@ -31,9 +34,9 @@ const usuarioSchema = new Schema({
     },
     password:{
         type:String,
-        // Ya NO es required: true global.
-        // Se valida condicionalmente en el hook pre('validate')
-        // para permitir usuarios de Google OAuth sin contraseña local.
+        required: function() {
+            return this.authProvider === 'local';
+        },
         default:null
     },
 
@@ -46,8 +49,7 @@ const usuarioSchema = new Schema({
         type:String,
         trim:true,
         unique:true,
-        sparse:true,      // Permite múltiples documentos con null (usuarios Google)
-        default:null
+        sparse:true      // Permite múltiples documentos sin este campo (usuarios Google)
     },
 
     // URL de la foto de perfil alojada en Cloudinary
@@ -61,8 +63,7 @@ const usuarioSchema = new Schema({
     googleId:{
         type:String,
         unique:true,
-        sparse:true,       // Permite múltiples documentos con null (usuarios locales)
-        default:null
+        sparse:true       // Permite múltiples documentos sin este campo (usuarios locales)
     },
 
     // Indica cómo se registró el usuario: 'local' (email/password) o 'google' (OAuth)
@@ -98,16 +99,7 @@ const usuarioSchema = new Schema({
 })
 
 
-// ═══════════════════════════════════════════════════════
-// HOOK: Validación condicional del password
-// Solo es obligatorio cuando el usuario se registra de forma local.
-// Los usuarios de Google OAuth no tienen contraseña en nuestro sistema.
-// ═══════════════════════════════════════════════════════
-usuarioSchema.pre('validate', function() {
-    if (this.authProvider === 'local' && !this.password) {
-        this.invalidate('password', 'La contraseña es obligatoria para registro local')
-    }
-})
+
 
 
 // Método para cifrar el password

@@ -124,7 +124,7 @@ const Login = () => {
                         className="w-full mt-4 flex items-center justify-center border border-gray-300 py-2 rounded-xl text-sm font-medium text-gray-600 transition duration-300 hover:bg-gray-50"
                     >
                         <img className="w-5 mr-2" src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google Logo" />
-                        Ingresar con Google institucional
+                        Ingresar con Google
                     </a>
 
                     {/* Enlace para olvidaste tu contraseña */}

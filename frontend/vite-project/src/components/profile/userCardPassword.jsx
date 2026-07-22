@@ -2,12 +2,18 @@ import { useForm } from "react-hook-form"
 import storeProfile from "../../context/userProfile"
 import storeAuth from "../../context/storeAuth"
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { MdVisibility, MdVisibilityOff } from "react-icons/md"
 
 const UserCardPassword = () => {
     const { register, handleSubmit, formState: { errors } } = useForm()
     const { user, updatePasswordProfile } = storeProfile()
     const { clearToken } = storeAuth()
     const navigate = useNavigate()
+    
+    // Estados para controlar la visibilidad de ambas contraseñas
+    const [showPasswordActual, setShowPasswordActual] = useState(false)
+    const [showPasswordNuevo, setShowPasswordNuevo] = useState(false)
 
     const updatePassword = async (dataForm) => {
         // 🎓 ADAPTADO: Apunta exactamente a tu ruta protegida de Express
@@ -43,12 +49,24 @@ const UserCardPassword = () => {
                 {/* Campo contraseña actual */}
                 <div>
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-400">Contraseña Actual</label>
-                    <input 
-                        type="password" 
-                        placeholder="••••••••••••" 
-                        className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-800 focus:border-amber-500 focus:bg-slate-950 focus:outline-none transition duration-200"
-                        {...register("passwordactual", { required: "La contraseña actual es obligatoria" })}
-                    />
+                    <div className="relative">
+                        <input 
+                            type={showPasswordActual ? "text" : "password"} 
+                            placeholder="••••••••••••" 
+                            className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 pl-3.5 pr-10 text-slate-200 placeholder-slate-800 focus:border-amber-500 focus:bg-slate-950 focus:outline-none transition duration-200"
+                            {...register("passwordactual", { required: "La contraseña actual es obligatoria" })}
+                        />
+                        <button
+                            type="button"
+                            onMouseDown={() => setShowPasswordActual(true)}
+                            onMouseUp={() => setShowPasswordActual(false)}
+                            onMouseLeave={() => setShowPasswordActual(false)}
+                            className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-amber-500 cursor-pointer transition-colors"
+                            title="Mantén presionado para ver la contraseña"
+                        >
+                            {showPasswordActual ? <MdVisibilityOff size={18} /> : <MdVisibility size={18} />}
+                        </button>
+                    </div>
                     {errors.passwordactual && (
                         <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.passwordactual.message}</p>
                     )}
@@ -57,12 +75,24 @@ const UserCardPassword = () => {
                 {/* Campo contraseña nueva */}
                 <div>
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-400">Nueva Contraseña</label>
-                    <input 
-                        type="password" 
-                        placeholder="Mínimo 6 caracteres" 
-                        className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-800 focus:border-amber-500 focus:bg-slate-950 focus:outline-none transition duration-200"
-                        {...register("passwordnuevo", { required: "La nueva contraseña es obligatoria" })}
-                    />
+                    <div className="relative">
+                        <input 
+                            type={showPasswordNuevo ? "text" : "password"} 
+                            placeholder="Mínimo 6 caracteres" 
+                            className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 pl-3.5 pr-10 text-slate-200 placeholder-slate-800 focus:border-amber-500 focus:bg-slate-950 focus:outline-none transition duration-200"
+                            {...register("passwordnuevo", { required: "La nueva contraseña es obligatoria" })}
+                        />
+                        <button
+                            type="button"
+                            onMouseDown={() => setShowPasswordNuevo(true)}
+                            onMouseUp={() => setShowPasswordNuevo(false)}
+                            onMouseLeave={() => setShowPasswordNuevo(false)}
+                            className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-amber-500 cursor-pointer transition-colors"
+                            title="Mantén presionado para ver la contraseña"
+                        >
+                            {showPasswordNuevo ? <MdVisibilityOff size={18} /> : <MdVisibility size={18} />}
+                        </button>
+                    </div>
                     {errors.passwordnuevo && (
                         <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.passwordnuevo.message}</p>
                     )}

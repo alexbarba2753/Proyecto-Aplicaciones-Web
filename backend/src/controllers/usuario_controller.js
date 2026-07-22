@@ -52,20 +52,12 @@ const registro = async (req, res) => {
             return res.status(400).json({ msg: "La cédula ya se encuentra registrada en otro usuario" });
         }
 
-        let datosRegistroCivil;
-        try {
-            datosRegistroCivil = await validarCedulaEcuador(cedula);
-        } catch (errorCedula) {
-            return res.status(400).json({ msg: errorCedula.message || "La cédula no es válida o no existe en el registro civil" });
-        }
-
-        // Si EcuadorAPI devolvió nombres reales, los usamos para prellenar (garantiza datos verídicos)
-        if (datosRegistroCivil.nombre) {
-            req.body.nombre = datosRegistroCivil.nombre;
-        }
-        if (datosRegistroCivil.apellido) {
-            req.body.apellido = datosRegistroCivil.apellido;
-        }
+        // ═══════════════════════════════════════════════════════
+        // NOTA: Para no gastar saldo de EcuadorAPI en fase de pruebas,
+        // ya NO verificamos la cédula aquí obligatoriamente. 
+        // Solo se verifica si el usuario le da al botón "Verificar" en el frontend.
+        // Confiamos en los datos que llegan en req.body.nombre y req.body.apellido.
+        // ═══════════════════════════════════════════════════════
         
         // [PASO 4]: NORMALIZAR EL ROL A MINÚSCULAS
         // Aseguramos consistencia independientemente de cómo llegue del formulario
@@ -110,6 +102,7 @@ const registro = async (req, res) => {
 
     } catch (error) {
         // MANEJO DE ERRORES: Si algo falla (ej. se cayó la base de datos), cae aquí
+        console.error("❌ Error en registro:", error)
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
     }
 

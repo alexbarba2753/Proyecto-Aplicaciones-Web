@@ -70,33 +70,28 @@ const generarAvatarIA = async (userId) => {
 
 
         // ═══════════════════════════════════════════════════════
-        // PASO 2: LLAMAR A HUGGING FACE INFERENCE API
-        // Usamos Stable Diffusion XL Base 1.0 para generación de imágenes
+        // PASO 2: LLAMAR A LA API DE GENERACIÓN DE IMÁGENES (Pollinations.ai)
+        // Usamos Pollinations (basado en Stable Diffusion/Flux) como alternativa
+        // robusta ya que la API gratuita de Hugging Face está dando errores 410 (Gone)
+        // o bloqueos de red (ENOTFOUND) en el servidor actual.
         // ═══════════════════════════════════════════════════════
 
-        const respuestaHF = await axios.post(
-            'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0',
-            { inputs: prompt },
-            {
-                headers: {
-                    'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                responseType: 'arraybuffer',   // Recibimos el binario de la imagen directamente
-                timeout: 60000                  // 60 segundos de timeout (la generación puede tardar)
-            }
-        )
+        // Añadimos parámetros para tamaño (256x256) y nologo (sin marca de agua)
+        const urlAPI = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=256&height=256&nologo=true`
+
+        const respuestaIA = await axios.get(urlAPI, {
+            responseType: 'arraybuffer',   // Recibimos el binario de la imagen directamente
+            timeout: 30000                 // 30 segundos de timeout
+        })
 
         // Verificamos que la respuesta sea una imagen válida
-        const contentType = respuestaHF.headers['content-type']
+        const contentType = respuestaIA.headers['content-type']
         if (!contentType || !contentType.includes('image')) {
-            // Si Hugging Face devuelve JSON en vez de imagen (ej: modelo cargando), parseamos el error
-            const textoError = Buffer.from(respuestaHF.data).toString('utf-8')
-            console.warn('⚠️ Hugging Face no devolvió una imagen:', textoError)
+            console.warn('⚠️ La IA no devolvió una imagen válida')
             return null
         }
 
-        const bufferImagen = Buffer.from(respuestaHF.data)
+        const bufferImagen = Buffer.from(respuestaIA.data)
         console.log(`✅ Imagen generada por IA: ${bufferImagen.length} bytes`)
 
 
@@ -119,9 +114,7 @@ const generarAvatarIA = async (userId) => {
         // ═══════════════════════════════════════════════════════
 
         if (error.response?.status === 503) {
-            console.warn('⚠️ Modelo de Hugging Face está cargando. Avatar no generado.')
-        } else if (error.response?.status === 401) {
-            console.error('❌ API Key de Hugging Face inválida. Verifica HUGGINGFACE_API_KEY en .env')
+            console.warn('⚠️ La IA está sobrecargada. Avatar no generado.')
         } else if (error.code === 'ECONNABORTED') {
             console.warn('⚠️ Timeout al generar avatar con IA. Se omite el avatar.')
         } else {

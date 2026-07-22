@@ -65,7 +65,12 @@ const UserFormularioPerfil = () => {
                                 type="text" 
                                 placeholder="Tu nombre" 
                                 className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-700 focus:border-blue-600 focus:bg-slate-950 focus:outline-none transition duration-200"
-                                {...register("nombre", { required: "El nombre es obligatorio" })}
+                                {...register("nombre", { 
+                                    required: "El nombre es obligatorio",
+                                    pattern: { value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, message: "Solo se permiten letras y espacios" },
+                                    minLength: { value: 2, message: "Mínimo 2 caracteres" },
+                                    maxLength: { value: 15, message: "Máximo 15 caracteres" }
+                                })}
                             />
                             {errors.nombre && <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.nombre.message}</p>}
                         </div>
@@ -77,7 +82,12 @@ const UserFormularioPerfil = () => {
                                 type="text" 
                                 placeholder="Tu apellido" 
                                 className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-700 focus:border-blue-600 focus:bg-slate-950 focus:outline-none transition duration-200"
-                                {...register("apellido", { required: "El apellido es obligatorio" })}
+                                {...register("apellido", { 
+                                    required: "El apellido es obligatorio",
+                                    pattern: { value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, message: "Solo se permiten letras y espacios" },
+                                    minLength: { value: 2, message: "Mínimo 2 caracteres" },
+                                    maxLength: { value: 15, message: "Máximo 15 caracteres" }
+                                })}
                             />
                             {errors.apellido && <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.apellido.message}</p>}
                         </div>
@@ -90,7 +100,10 @@ const UserFormularioPerfil = () => {
                             type="text" 
                             placeholder="Ej. Calderón, Quito" 
                             className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-700 focus:border-blue-600 focus:bg-slate-950 focus:outline-none transition duration-200"
-                            {...register("direccion", { required: "La dirección es obligatoria" })}
+                            {...register("direccion", { 
+                                required: "La dirección es obligatoria",
+                                maxLength: { value: 40, message: "La dirección no puede exceder los 40 caracteres" }
+                            })}
                         />
                         {errors.direccion && <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.direccion.message}</p>}
                     </div>
@@ -104,7 +117,12 @@ const UserFormularioPerfil = () => {
                                 inputMode="tel" 
                                 placeholder="Ej. 09XXXXXXXX" 
                                 className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-700 focus:border-blue-600 focus:bg-slate-950 focus:outline-none transition duration-200"
-                                {...register("celular", { required: "El celular es obligatorio" })}
+                                {...register("celular", { 
+                                    required: "El celular es obligatorio",
+                                    pattern: { value: /^[0-9]+$/, message: "Solo se permiten números" },
+                                    minLength: { value: 9, message: "Mínimo 9 dígitos" },
+                                    maxLength: { value: 10, message: "Máximo 10 dígitos" }
+                                })}
                             />
                             {errors.celular && <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.celular.message}</p>}
                         </div>
@@ -116,7 +134,13 @@ const UserFormularioPerfil = () => {
                                 type="email" 
                                 placeholder="usuario@epn.edu.ec" 
                                 className="block w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 px-3.5 text-slate-200 placeholder-slate-700 focus:border-blue-600 focus:bg-slate-950 focus:outline-none transition duration-200"
-                                {...register("email", { required: "El correo es obligatorio" })}
+                                {...register("email", { 
+                                    required: "El correo es obligatorio",
+                                    pattern: {
+                                        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                                        message: "Formato de correo inválido"
+                                    }
+                                })}
                             />
                             {errors.email && <p className="text-red-500 text-xs mt-1.5 font-semibold pl-1">⚠️ {errors.email.message}</p>}
                         </div>

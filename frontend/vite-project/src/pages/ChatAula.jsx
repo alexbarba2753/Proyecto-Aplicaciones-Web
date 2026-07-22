@@ -120,19 +120,20 @@ const ChatAula = () => {
                     <div className="text-center text-slate-500 mt-10">No hay mensajes. ¡Sé el primero en saludar!</div>
                 ) : (
                     mensajes.map((msg, index) => {
-                        const esMio = msg.remitente._id === user._id
+                        const remitenteValido = msg.remitente || { _id: 'deleted', nombre: 'Usuario', apellido: 'Eliminado', perfil: null }
+                        const esMio = remitenteValido._id === user._id
                         return (
                             <div key={msg._id || index} className={`flex gap-3 ${esMio ? 'flex-row-reverse' : 'flex-row'}`}>
                                 {/* Avatar */}
                                 <img 
-                                    src={msg.remitente.perfil || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"} 
+                                    src={remitenteValido.perfil || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"} 
                                     alt="Avatar" 
                                     className="w-8 h-8 rounded-full border border-slate-700 object-cover"
                                 />
                                 {/* Burbuja */}
                                 <div className={`max-w-[70%] ${esMio ? 'items-end' : 'items-start'} flex flex-col`}>
                                     <span className="text-xs text-slate-400 mb-1 mx-1">
-                                        {esMio ? 'Tú' : `${msg.remitente.nombre} ${msg.remitente.apellido}`}
+                                        {esMio ? 'Tú' : `${remitenteValido.nombre} ${remitenteValido.apellido}`}
                                     </span>
                                     <div className={`px-4 py-2 rounded-2xl ${esMio ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'}`}>
                                         {msg.contenido}
