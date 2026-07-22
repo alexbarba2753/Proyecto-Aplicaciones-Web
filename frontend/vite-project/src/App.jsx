@@ -11,6 +11,7 @@ import ProfileUser from './pages/ProfileUser'
 import AulasLista from './pages/AulasLista'
 import AulaDetalle from './pages/AulaDetalle'
 import AulaCrear from './pages/AulaCrear'
+import ChatAula from './pages/ChatAula'
 import GoogleCallbackPage from './pages/GoogleCallbackPage'
 import PublicRoute from './routes/PublicRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
@@ -52,6 +53,7 @@ function App() {
           <Route path="aulas" element={<AulasLista />} />
           <Route path="aulas/crear" element={<AulaCrear />} />
           <Route path="aulas/:id" element={<AulaDetalle />} />
+          <Route path="chat/:id" element={<ChatAula />} />
         </Route>
 
       </Routes>

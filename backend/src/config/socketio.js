@@ -48,7 +48,7 @@ const initSocketIO = (httpServer) => {
 
             // Buscamos al usuario en la BDD para validar que aún existe
             const usuario = await Usuario.findById(decoded.id)
-                .select('nombre apellido email rol')
+                .select('nombre apellido email rol perfil')
                 .lean()
 
             if (!usuario) {
@@ -61,7 +61,8 @@ const initSocketIO = (httpServer) => {
                 nombre: usuario.nombre,
                 apellido: usuario.apellido,
                 email: usuario.email,
-                rol: usuario.rol
+                rol: usuario.rol,
+                perfil: usuario.perfil
             }
 
             next()
@@ -165,7 +166,8 @@ const initSocketIO = (httpServer) => {
                     remitente: {
                         _id: socket.usuario._id,
                         nombre: socket.usuario.nombre,
-                        apellido: socket.usuario.apellido
+                        apellido: socket.usuario.apellido,
+                        perfil: socket.usuario.perfil
                     },
                     aula: aulaId
                 }
