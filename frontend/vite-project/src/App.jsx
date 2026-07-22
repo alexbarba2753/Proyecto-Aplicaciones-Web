@@ -13,6 +13,7 @@ import AulaDetalle from './pages/AulaDetalle'
 import AulaCrear from './pages/AulaCrear'
 import ChatAula from './pages/ChatAula'
 import GoogleCallbackPage from './pages/GoogleCallbackPage'
+import { CompletarPerfil } from './pages/CompletarPerfil'
 import PublicRoute from './routes/PublicRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
 import storeAuth from './context/storeAuth'
@@ -32,6 +33,13 @@ function App() {
 
         {/* 🆕 Ruta de callback de Google OAuth (fuera de PublicRoute/ProtectedRoute) */}
         <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+        
+        {/* Ruta para completar perfil post-Google Login */}
+        <Route path="/completar-perfil" element={
+          <ProtectedRoute>
+            <CompletarPerfil />
+          </ProtectedRoute>
+        } />
 
         <Route element={<PublicRoute />}>
           <Route index element={<Home />} />

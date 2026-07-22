@@ -48,6 +48,11 @@ passport.use(new GoogleStrategy(
             let usuario = await Usuario.findOne({ googleId })
 
             if (usuario) {
+                // Si es un usuario antiguo de Google pero no ha completado su perfil
+                if (!usuario.cedula) {
+                    usuario.registroCompleto = false
+                    await usuario.save()
+                }
                 return done(null, usuario)
             }
 
@@ -63,6 +68,9 @@ passport.use(new GoogleStrategy(
                 // Si no tiene foto de perfil, usamos la de Google
                 if (!usuario.perfil && fotoPerfil) {
                     usuario.perfil = fotoPerfil
+                }
+                if (!usuario.cedula) {
+                    usuario.registroCompleto = false
                 }
                 await usuario.save()
                 return done(null, usuario)
@@ -80,7 +88,8 @@ passport.use(new GoogleStrategy(
                 authProvider: 'google',
                 perfil: fotoPerfil,
                 confirmEmail: true,     // Las cuentas de Google ya están verificadas por Google
-                rol: 'estudiante'       // Rol por defecto (el admin puede cambiarlo después)
+                rol: 'estudiante',      // Rol por defecto (el admin puede cambiarlo después)
+                registroCompleto: false // Siempre false para nuevos de Google
             })
 
             await nuevoUsuario.save()

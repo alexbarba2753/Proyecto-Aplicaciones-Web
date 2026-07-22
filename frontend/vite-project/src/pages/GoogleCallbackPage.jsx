@@ -37,12 +37,18 @@ const GoogleCallbackPage = () => {
 
         // Si el token llegó correctamente
         if (token && rol) {
+            const completado = searchParams.get('completado')
             // Guardar en Zustand (persiste en localStorage automáticamente)
             setToken(token)
             setRol(rol)
 
-            // Redirigir al Dashboard
-            navigate('/dashboard')
+            // Redirigir al formulario de completar si falta la cédula
+            if (completado === 'false') {
+                navigate('/completar-perfil')
+            } else {
+                // Redirigir al Dashboard si ya tiene perfil completo
+                navigate('/dashboard')
+            }
         } else {
             // Si faltan parámetros, algo salió mal
             setError('No se recibieron las credenciales de Google. Redirigiendo...')

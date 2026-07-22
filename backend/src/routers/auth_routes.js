@@ -66,7 +66,8 @@ router.get('/auth/google/callback',
                 rol,
                 nombre: usuario.nombre,
                 apellido: usuario.apellido,
-                _id: usuario._id.toString()
+                _id: usuario._id.toString(),
+                completado: usuario.registroCompleto
             })
 
             res.redirect(`${frontendCallback}?${params.toString()}`)

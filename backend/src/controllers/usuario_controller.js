@@ -482,6 +482,67 @@ const verificarCedula = async (req, res) => {
     }
 }
 
+/**
+ * CONTROLADOR: Permite a los usuarios de Google completar su perfil faltante.
+ */
+const completarPerfilGoogle = async (req, res) => {
+    try {
+        const { cedula, celular, rol, nombre, apellido } = req.body;
+        
+        // El usuario debe estar logueado, así que el ID viene del token JWT
+        const usuarioBDD = await Usuario.findById(req.usuario._id);
+        
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "Usuario no encontrado" });
+        }
+
+        // Si ya tiene el perfil completo, no debería llamar a esto
+        if (usuarioBDD.registroCompleto) {
+            return res.status(400).json({ msg: "Tu perfil ya está completo" });
+        }
+
+        // Verificamos si la cédula fue enviada
+        if (!cedula) {
+            return res.status(400).json({ msg: "La cédula es obligatoria para completar el registro" });
+        }
+
+        // Verificar que la cédula no esté ya en uso
+        const cedulaExistente = await Usuario.findOne({ cedula, _id: { $ne: usuarioBDD._id } });
+        if (cedulaExistente) {
+            return res.status(400).json({ msg: "La cédula ya se encuentra registrada en otra cuenta" });
+        }
+
+        // Asignamos los nuevos valores
+        usuarioBDD.cedula = cedula;
+        usuarioBDD.celular = celular || usuarioBDD.celular;
+        
+        // Normalizar rol
+        if (rol) {
+            usuarioBDD.rol = rol.toLowerCase().trim();
+        }
+
+        // Actualizar nombre y apellido si el usuario los modificó
+        if (nombre) usuarioBDD.nombre = nombre;
+        if (apellido) usuarioBDD.apellido = apellido;
+
+        // Marcamos el registro como completo
+        usuarioBDD.registroCompleto = true;
+
+        await usuarioBDD.save();
+
+        res.status(200).json({ 
+            msg: "Perfil completado exitosamente",
+            rol: usuarioBDD.rol,
+            nombre: usuarioBDD.nombre,
+            apellido: usuarioBDD.apellido
+        });
+
+    } catch (error) {
+        console.error("Error al completar perfil de Google:", error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error.message}` });
+    }
+}
+
 // Exportamos toda la lista final de controladores unificados de tu proyecto
 export {
     registro,
@@ -493,5 +554,6 @@ export {
     perfil,
     actualizarPerfil,
     actualizarPassword,
-    verificarCedula
+    verificarCedula,
+    completarPerfilGoogle
 }

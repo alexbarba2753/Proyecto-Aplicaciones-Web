@@ -92,6 +92,10 @@ const usuarioSchema = new Schema({
     rol:{
         type:String,
         default:"estudiante"
+    },
+    registroCompleto: {
+        type: Boolean,
+        default: true
     }
 
 },{

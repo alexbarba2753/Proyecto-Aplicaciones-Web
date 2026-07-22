@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { confirmarMail, registro, crearNuevoPassword, recuperarPassword, comprobarTokenPasword, login, perfil, actualizarPerfil, actualizarPassword, verificarCedula } from '../controllers/usuario_controller.js'
+import { confirmarMail, registro, crearNuevoPassword, recuperarPassword, comprobarTokenPasword, login, perfil, actualizarPerfil, actualizarPassword, verificarCedula, completarPerfilGoogle } from '../controllers/usuario_controller.js'
 import { verificarTokenJWT } from '../middlewares/JWT.js'
 const router = Router()
 
@@ -32,5 +32,9 @@ router.put('/usuario/actualizarperfil/:id', verificarTokenJWT, actualizarPerfil)
 
 
 router.put('/usuario/actualizarpassword/:id', verificarTokenJWT, actualizarPassword)
+
+
+router.put('/usuario/completar-perfil', verificarTokenJWT, completarPerfilGoogle)
+
 
 export default router
