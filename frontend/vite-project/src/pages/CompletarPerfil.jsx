@@ -9,6 +9,7 @@ import axios from "axios"
 
 export const CompletarPerfil = () => {
     const [verifyingCedula, setVerifyingCedula] = useState(false)
+    const [isVerified, setIsVerified] = useState(false)
     const { fetchDataBackend, loading } = useFetch()
     const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm()
     const navigate = useNavigate()
@@ -62,7 +63,8 @@ export const CompletarPerfil = () => {
                 setValue("apellido", response.data.apellido, { shouldValidate: true })
             }
             
-            toast.success("Cédula verificada. Puedes modificar tu nombre si lo deseas.")
+            setIsVerified(true)
+            toast.success("Cédula verificada con éxito.")
         } catch (error) {
             toast.error(error.response?.data?.msg || "Error al verificar la cédula")
         } finally {
@@ -75,8 +77,8 @@ export const CompletarPerfil = () => {
             <ToastContainer />
 
             {/* Contenedor del Formulario */}
-            <div className="w-full sm:w-1/2 h-screen bg-white flex justify-center items-center p-6 overflow-y-auto">
-                <div className="md:w-4/5 w-full">
+            <div className="w-full sm:w-1/2 h-screen bg-white flex justify-center p-6 overflow-y-auto">
+                <div className="md:w-4/5 w-full my-auto py-8">
                     <h1 className="text-3xl font-semibold mb-2 text-center uppercase text-gray-600">Completa tu Perfil</h1>
                     <small className="text-gray-400 block my-4 text-sm text-center">
                         Para continuar usando el sistema, por favor proporciona los siguientes datos.
@@ -97,7 +99,8 @@ export const CompletarPerfil = () => {
                                         pattern: {
                                             value: /^[0-9]{10}$/,
                                             message: "La cédula debe tener exactamente 10 dígitos numéricos"
-                                        }
+                                        },
+                                        onChange: () => setIsVerified(false)
                                     })}
                                 />
                                 <button
@@ -118,7 +121,8 @@ export const CompletarPerfil = () => {
                             <input
                                 type="text"
                                 placeholder="Tus nombres"
-                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                readOnly={isVerified}
+                                className={`block w-full rounded-md border border-gray-300 py-1.5 px-3 focus:outline-gray-400 ${isVerified ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'text-gray-600'}`}
                                 {...register("nombre", {
                                     required: "El nombre es obligatorio",
                                     pattern: {
@@ -138,7 +142,8 @@ export const CompletarPerfil = () => {
                             <input
                                 type="text"
                                 placeholder="Tus apellidos"
-                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                readOnly={isVerified}
+                                className={`block w-full rounded-md border border-gray-300 py-1.5 px-3 focus:outline-gray-400 ${isVerified ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'text-gray-600'}`}
                                 {...register("apellido", {
                                     required: "El apellido es obligatorio",
                                     pattern: {
@@ -150,6 +155,21 @@ export const CompletarPerfil = () => {
                                 })}
                             />
                             {errors.apellido && <p className="text-red-600 text-xs mt-1">{errors.apellido.message}</p>}
+                        </div>
+
+                        {/* Campo Dirección */}
+                        <div>
+                            <label className="mb-1 block text-sm font-semibold text-gray-700">Dirección</label>
+                            <input
+                                type="text"
+                                placeholder="Ingresa tu dirección"
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                {...register("direccion", {
+                                    required: "La dirección es obligatoria",
+                                    maxLength: { value: 40, message: "La dirección no puede exceder los 40 caracteres" }
+                                })}
+                            />
+                            {errors.direccion && <p className="text-red-600 text-xs mt-1">{errors.direccion.message}</p>}
                         </div>
 
                         {/* Campo celular */}

@@ -53,8 +53,8 @@ export const Register = () => {
             <ToastContainer />
 
             {/* Contenedor del Formulario */}
-            <div className="w-full sm:w-1/2 h-screen bg-white flex justify-center items-center p-6 overflow-y-auto">
-                <div className="md:w-4/5 w-full">
+            <div className="w-full sm:w-1/2 h-screen bg-white flex justify-center p-6 overflow-y-auto">
+                <div className="md:w-4/5 w-full my-auto py-8">
                     <h1 className="text-3xl font-semibold mb-2 text-center uppercase text-gray-600">PracticasPPoli</h1>
                     <small className="text-gray-400 block my-4 text-sm text-center">
                         Formulario de Registro - Control de Prácticas ESFOT
@@ -131,6 +131,21 @@ export const Register = () => {
                                 })}
                             />
                             {errors.apellido && <p className="text-red-600 text-xs mt-1">{errors.apellido.message}</p>}
+                        </div>
+
+                        {/* Campo Dirección */}
+                        <div>
+                            <label className="mb-1 block text-sm font-semibold text-gray-700">Dirección</label>
+                            <input
+                                type="text"
+                                placeholder="Ingresa tu dirección"
+                                className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                {...register("direccion", {
+                                    required: "La dirección es obligatoria",
+                                    maxLength: { value: 40, message: "La dirección no puede exceder los 40 caracteres" }
+                                })}
+                            />
+                            {errors.direccion && <p className="text-red-600 text-xs mt-1">{errors.direccion.message}</p>}
                         </div>
 
                         {/* Campo celular */}

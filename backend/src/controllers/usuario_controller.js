@@ -487,7 +487,7 @@ const verificarCedula = async (req, res) => {
  */
 const completarPerfilGoogle = async (req, res) => {
     try {
-        const { cedula, celular, rol, nombre, apellido } = req.body;
+        const { cedula, celular, rol, nombre, apellido, direccion } = req.body;
         
         // El usuario debe estar logueado, así que el ID viene del token JWT
         const usuarioBDD = await Usuario.findById(req.usuario._id);
@@ -515,6 +515,10 @@ const completarPerfilGoogle = async (req, res) => {
         // Asignamos los nuevos valores
         usuarioBDD.cedula = cedula;
         usuarioBDD.celular = celular || usuarioBDD.celular;
+        
+        if (direccion) {
+            usuarioBDD.direccion = direccion;
+        }
         
         // Normalizar rol
         if (rol) {
