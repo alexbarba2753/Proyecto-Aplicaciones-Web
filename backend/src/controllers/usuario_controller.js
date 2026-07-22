@@ -68,17 +68,6 @@ const registro = async (req, res) => {
         // [PASO 5]: INSTANCIAR EL NUEVO USUARIO
         // Creamos un nuevo documento en memoria RAM usando la estructura de nuestro Usuario Schema
         const nuevoUsuario = new Usuario(req.body);
-
-        // ═══════════════════════════════════════════════════════
-        // 🆕 [PASO 5.5]: GENERAR AVATAR CON IA Y SUBIR A CLOUDINARY
-        // Genera una imagen única con Hugging Face y la aloja en Cloudinary.
-        // Si falla, el registro continúa normalmente (graceful degradation).
-        // ═══════════════════════════════════════════════════════
-        
-        const avatarUrl = await generarAvatarIA(nuevoUsuario._id.toString());
-        if (avatarUrl) {
-            nuevoUsuario.perfil = avatarUrl;
-        }
         
         // [PASO 6]: ENCRIPTAR CONTRASEÑA
         // Llamamos al método asíncrono del modelo para transformar la clave en texto plano a un hash seguro de bcrypt
@@ -99,6 +88,22 @@ const registro = async (req, res) => {
         // [PASO 10]: RESPUESTA EXITOSA Al FRONTEND
         // Si todo salió bien hasta aquí, respondemos al usuario con un estado 200 (OK)
         res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
+
+        // ═══════════════════════════════════════════════════════
+        // 🆕 [PASO 11]: GENERAR AVATAR CON IA EN SEGUNDO PLANO
+        // Se ejecuta DESPUÉS de responder al usuario para evitar timeouts en Render.
+        // Si falla, el usuario queda sin foto pero el registro ya fue exitoso.
+        // ═══════════════════════════════════════════════════════
+        generarAvatarIA(nuevoUsuario._id.toString()).then(avatarUrl => {
+            if (avatarUrl) {
+                Usuario.findByIdAndUpdate(nuevoUsuario._id, { perfil: avatarUrl }).catch(err => {
+                    console.error("❌ Error guardando avatar en BDD:", err.message);
+                });
+                console.log(`☁️ Avatar asignado a ${nuevoUsuario.email}`);
+            }
+        }).catch(err => {
+            console.warn("⚠️ Avatar no generado (segundo plano):", err.message);
+        });
 
     } catch (error) {
         // MANEJO DE ERRORES: Si algo falla (ej. se cayó la base de datos), cae aquí

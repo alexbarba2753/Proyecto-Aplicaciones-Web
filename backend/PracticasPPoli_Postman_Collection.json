@@ -1,0 +1,693 @@
+{
+	"info": {
+		"_postman_id": "esfot-practicas-api-2026",
+		"name": "PracticasPPoli - API ESFOT",
+		"description": "Colección completa de endpoints del Sistema de Control de Prácticas ESFOT.\n\n**Base URL Local:** http://localhost:3000/api\n**Base URL Producción:** https://proyecto-aplicaciones-web-grw3.onrender.com/api\n\n**Instrucciones:**\n1. Configura la variable `{{base_url}}` en tu Environment.\n2. Los endpoints marcados con 🔒 requieren Bearer Token.\n3. Ejecuta primero el Registro y luego el Login para obtener tu token JWT.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api"
+		},
+		{
+			"key": "token_estudiante",
+			"value": ""
+		},
+		{
+			"key": "token_docente",
+			"value": ""
+		},
+		{
+			"key": "id_estudiante",
+			"value": ""
+		},
+		{
+			"key": "id_docente",
+			"value": ""
+		},
+		{
+			"key": "id_aula",
+			"value": ""
+		},
+		{
+			"key": "codigo_aula",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "🔓 Endpoints Públicos (Sin Token)",
+			"description": "Estos endpoints NO requieren autenticación. Son usados para registro, confirmación de cuenta, login y recuperación de contraseña.",
+			"item": [
+				{
+					"name": "01 - Verificar Cédula (EcuadorAPI)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/usuario/verificar-cedula/1712345678",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "verificar-cedula", "1712345678"]
+						},
+						"description": "**Verifica una cédula ecuatoriana** consultando la API de Ecuador.\n\nDevuelve el nombre y apellido registrado en el Registro Civil.\n\n**Parámetros de URL:**\n- `cedula` (string, 10 dígitos) — Reemplaza `1712345678` con la cédula real.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"nombre\": \"JUAN CARLOS\",\n  \"apellido\": \"PEREZ GONZALEZ\"\n}\n```\n\n**Errores posibles:**\n- 400: Cédula con formato inválido\n- 404: Cédula no encontrada en el registro civil"
+					}
+				},
+				{
+					"name": "02 - Confirmar Cuenta por Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/confirmar/TOKEN_DEL_EMAIL",
+							"host": ["{{base_url}}"],
+							"path": ["confirmar", "TOKEN_DEL_EMAIL"]
+						},
+						"description": "**Activa la cuenta** usando el token que se envió al correo del usuario al registrarse.\n\n**Parámetros de URL:**\n- `token` (string) — El token aleatorio que llegó al correo. Reemplaza `TOKEN_DEL_EMAIL`.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Cuenta confirmada, ya puedes iniciar sesión\"\n}\n```\n\n**Errores posibles:**\n- 404: Token inválido o cuenta ya confirmada"
+					}
+				},
+				{
+					"name": "03 - Solicitar Recuperación de Contraseña",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@epn.edu.ec\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/recuperarpassword",
+							"host": ["{{base_url}}"],
+							"path": ["recuperarpassword"]
+						},
+						"description": "**Envía un email de recuperación** con un token temporal para reestablecer la contraseña.\n\n**Body (JSON):**\n- `email` (string, obligatorio) — Correo registrado.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Revisa tu correo electrónico para reestablecer tu cuenta\"\n}\n```\n\n**Errores posibles:**\n- 400: Campo vacío\n- 404: Usuario no registrado"
+					}
+				},
+				{
+					"name": "04 - Comprobar Token de Recuperación",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recuperarpassword/TOKEN_DE_RECUPERACION",
+							"host": ["{{base_url}}"],
+							"path": ["recuperarpassword", "TOKEN_DE_RECUPERACION"]
+						},
+						"description": "**Valida que el token de recuperación** enviado al correo aún sea válido.\n\n**Parámetros de URL:**\n- `token` (string) — Token de recuperación. Reemplaza `TOKEN_DE_RECUPERACION`.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Token confirmado, ya puedes crear tu nuevo password\"\n}\n```\n\n**Errores posibles:**\n- 404: Token inválido o expirado"
+					}
+				},
+				{
+					"name": "05 - Crear Nuevo Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"NuevaContraseña123\",\n  \"confirmpassword\": \"NuevaContraseña123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/nuevopassword/TOKEN_DE_RECUPERACION",
+							"host": ["{{base_url}}"],
+							"path": ["nuevopassword", "TOKEN_DE_RECUPERACION"]
+						},
+						"description": "**Establece una nueva contraseña** después de verificar el token de recuperación.\n\n**Parámetros de URL:**\n- `token` (string) — Token validado en el paso anterior.\n\n**Body (JSON):**\n- `password` (string, obligatorio)\n- `confirmpassword` (string, obligatorio) — Debe coincidir con `password`.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Felicitaciones, ya puedes iniciar sesión con tu nuevo password\"\n}\n```\n\n**Errores posibles:**\n- 404: Campos vacíos, passwords no coinciden, o token inválido"
+					}
+				}
+			]
+		},
+		{
+			"name": "👨‍🎓 Estudiante",
+			"description": "Flujo completo del rol **Estudiante**.\n\nOrden de ejecución recomendado:\n1. Registro → 2. (Confirmar email) → 3. Login → 4-N. Usar token obtenido.",
+			"item": [
+				{
+					"name": "01 - Registro Estudiante",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Mendoza\",\n  \"cedula\": \"1712345678\",\n  \"direccion\": \"Av. Ladrón de Guevara E11-253\",\n  \"celular\": \"0987654321\",\n  \"email\": \"carlos.mendoza@epn.edu.ec\",\n  \"rol\": \"Estudiante\",\n  \"password\": \"Estudiante123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/registro",
+							"host": ["{{base_url}}"],
+							"path": ["registro"]
+						},
+						"description": "**Registra un nuevo estudiante** en el sistema.\n\nDespués de ejecutar este endpoint, revisa el correo para confirmar la cuenta antes de hacer login.\n\n**Body (JSON) — Todos obligatorios:**\n| Campo | Tipo | Descripción |\n|---|---|---|\n| nombre | string | Mín 2, Máx 15 caracteres |\n| apellido | string | Mín 2, Máx 15 caracteres |\n| cedula | string | Exactamente 10 dígitos |\n| direccion | string | Máx 40 caracteres |\n| celular | string | 9-10 dígitos |\n| email | string | Correo institucional |\n| rol | string | `Estudiante`, `Docente` o `Supervisor` |\n| password | string | Contraseña segura |\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Revisa tu correo electrónico para confirmar tu cuenta\"\n}\n```"
+					}
+				},
+				{
+					"name": "02 - Login Estudiante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Auto-guarda el token y el ID del estudiante para los siguientes requests",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token_estudiante', jsonData.token);",
+									"    pm.collectionVariables.set('id_estudiante', jsonData._id);",
+									"    console.log('✅ Token de Estudiante guardado automáticamente');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"carlos.mendoza@epn.edu.ec\",\n  \"password\": \"Estudiante123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/login",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "login"]
+						},
+						"description": "**Inicia sesión como Estudiante.**\n\n⚡ **Script automático:** Al recibir respuesta 200, guarda automáticamente el `token` y `_id` en las variables de colección para que los demás endpoints los usen sin copiar manualmente.\n\n**Body (JSON):**\n- `email` (string, obligatorio)\n- `password` (string, obligatorio)\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"token\": \"eyJhbGciOi...\",\n  \"rol\": \"estudiante\",\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Mendoza\",\n  \"direccion\": \"Av. Ladrón de Guevara\",\n  \"celular\": \"0987654321\",\n  \"_id\": \"667abc...\",\n  \"email\": \"carlos.mendoza@epn.edu.ec\",\n  \"perfil\": \"https://res.cloudinary.com/...\"\n}\n```"
+					}
+				},
+				{
+					"name": "03 - Ver Mi Perfil 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}",
+								"description": "JWT obtenido del Login"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/usuario/perfil",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "perfil"]
+						},
+						"description": "🔒 **Requiere Bearer Token** del Login.\n\n**Devuelve los datos del perfil** del usuario autenticado.\n\n**Headers:**\n- `Authorization: Bearer <token>`\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"_id\": \"667abc...\",\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Mendoza\",\n  \"cedula\": \"1712345678\",\n  \"direccion\": \"Av. Ladrón de Guevara\",\n  \"celular\": \"0987654321\",\n  \"email\": \"carlos.mendoza@epn.edu.ec\",\n  \"rol\": \"estudiante\",\n  \"perfil\": \"https://res.cloudinary.com/...\"\n}\n```"
+					}
+				},
+				{
+					"name": "04 - Actualizar Mi Perfil 🔒",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Carlos Andrés\",\n  \"apellido\": \"Mendoza López\",\n  \"direccion\": \"Av. República E7-123\",\n  \"celular\": \"0991234567\",\n  \"email\": \"carlos.mendoza@epn.edu.ec\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/actualizarperfil/{{id_estudiante}}",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "actualizarperfil", "{{id_estudiante}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\n**Actualiza los datos del perfil** del estudiante.\n\n**Parámetro de URL:**\n- `id` — ID del usuario (se llena automáticamente con `{{id_estudiante}}`).\n\n**Body (JSON):**\n| Campo | Tipo | Descripción |\n|---|---|---|\n| nombre | string | Nuevo nombre |\n| apellido | string | Nuevo apellido |\n| direccion | string | Nueva dirección (máx 40) |\n| celular | string | Nuevo celular |\n| email | string | Nuevo correo |\n\n**Respuesta exitosa (200):** Devuelve el objeto del usuario actualizado."
+					}
+				},
+				{
+					"name": "05 - Cambiar Contraseña 🔒",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"passwordactual\": \"Estudiante123\",\n  \"passwordnuevo\": \"NuevaClave456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/actualizarpassword/{{id_estudiante}}",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "actualizarpassword", "{{id_estudiante}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\n**Cambia la contraseña** del usuario logueado.\n\n**Body (JSON):**\n- `passwordactual` (string) — La contraseña que tiene actualmente.\n- `passwordnuevo` (string) — La nueva contraseña deseada.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Password actualizado correctamente\"\n}\n```\n\n**Errores posibles:**\n- 404: Password actual incorrecto\n- 400: Cuenta de Google sin contraseña local"
+					}
+				},
+				{
+					"name": "06 - Unirse a un Aula (con código) 🔒",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"codigoAcceso\": \"{{codigo_aula}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/aulas/unirse",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "unirse"]
+						},
+						"description": "🔒 **Requiere Bearer Token de Estudiante.**\n\n**Inscribe al estudiante** en un aula usando el código de 6 caracteres que le proporcionó el docente.\n\n**Body (JSON):**\n- `codigoAcceso` (string, 6 caracteres alfanuméricos) — Reemplaza `{{codigo_aula}}` o escribe directamente.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Te has unido exitosamente al aula \\\"Prácticas Pre-Profesionales 2026\\\"\"\n}\n```\n\n**Errores posibles:**\n- 400: Código vacío o formato inválido\n- 404: Código de acceso inválido\n- 409: Ya estás inscrito en esta aula"
+					}
+				},
+				{
+					"name": "07 - Listar Mis Aulas 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas",
+							"host": ["{{base_url}}"],
+							"path": ["aulas"]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\n**Lista las aulas** en las que el estudiante está inscrito.\n\nEl filtro se aplica automáticamente según el rol del token:\n- **Estudiante**: Aulas donde está inscrito.\n- **Docente**: Aulas que creó.\n\n**Respuesta exitosa (200):** Array de objetos aula."
+					}
+				},
+				{
+					"name": "08 - Ver Detalle de un Aula 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas/{{id_aula}}",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "{{id_aula}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\n**Obtiene el detalle completo** de un aula específica, incluyendo la lista de estudiantes y datos del docente.\n\n**Parámetro de URL:**\n- `id` — ID de MongoDB del aula.\n\n**Respuesta exitosa (200):** Objeto aula con docente y estudiantes populados."
+					}
+				},
+				{
+					"name": "09 - Historial de Mensajes del Chat 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas/{{id_aula}}/mensajes?page=1&limit=50",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "{{id_aula}}", "mensajes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Número de página"
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Cantidad de mensajes por página"
+								}
+							]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\n**Obtiene el historial de mensajes** del chat de un aula (paginado).\n\nEl envío de mensajes en tiempo real se hace por **Socket.io**, este endpoint solo devuelve el historial.\n\n**Query Params:**\n- `page` (int, default: 1)\n- `limit` (int, default: 50)\n\n**Respuesta exitosa (200):** Array de objetos mensaje."
+					}
+				}
+			]
+		},
+		{
+			"name": "👨‍🏫 Docente",
+			"description": "Flujo completo del rol **Docente**.\n\nEl docente puede crear aulas, gestionarlas y ver todo lo que un estudiante ve, más operaciones exclusivas de gestión.",
+			"item": [
+				{
+					"name": "01 - Registro Docente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"María\",\n  \"apellido\": \"García\",\n  \"cedula\": \"1798765432\",\n  \"direccion\": \"Calle Toledo N24-456\",\n  \"celular\": \"0998877665\",\n  \"email\": \"maria.garcia@epn.edu.ec\",\n  \"rol\": \"Docente\",\n  \"password\": \"Docente123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/registro",
+							"host": ["{{base_url}}"],
+							"path": ["registro"]
+						},
+						"description": "**Registra un nuevo Docente.** El flujo es idéntico al del estudiante, lo que cambia es el campo `rol: \"Docente\"`.\n\nDespués de registrar, confirma el email antes de hacer login."
+					}
+				},
+				{
+					"name": "02 - Login Docente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Auto-guarda el token y el ID del docente",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token_docente', jsonData.token);",
+									"    pm.collectionVariables.set('id_docente', jsonData._id);",
+									"    console.log('✅ Token de Docente guardado automáticamente');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"maria.garcia@epn.edu.ec\",\n  \"password\": \"Docente123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/login",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "login"]
+						},
+						"description": "**Inicia sesión como Docente.**\n\n⚡ **Script automático:** Al recibir 200, guarda `token_docente` e `id_docente` automáticamente en las variables de colección."
+					}
+				},
+				{
+					"name": "03 - Ver Mi Perfil 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/usuario/perfil",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "perfil"]
+						},
+						"description": "🔒 **Requiere Bearer Token del Docente.**\n\nDevuelve el perfil del docente logueado."
+					}
+				},
+				{
+					"name": "04 - Actualizar Mi Perfil 🔒",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"María Fernanda\",\n  \"apellido\": \"García López\",\n  \"direccion\": \"Av. 6 de Diciembre N32-123\",\n  \"celular\": \"0991112233\",\n  \"email\": \"maria.garcia@epn.edu.ec\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/actualizarperfil/{{id_docente}}",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "actualizarperfil", "{{id_docente}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token del Docente.**\n\nActualiza los datos personales del docente."
+					}
+				},
+				{
+					"name": "05 - Cambiar Contraseña 🔒",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"passwordactual\": \"Docente123\",\n  \"passwordnuevo\": \"NuevaClave789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/actualizarpassword/{{id_docente}}",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "actualizarpassword", "{{id_docente}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token del Docente.**\n\nCambia la contraseña del docente logueado."
+					}
+				},
+				{
+					"name": "06 - Crear Aula Virtual 🔒",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Auto-guarda el ID y código del aula creada",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('id_aula', jsonData.aula._id);",
+									"    pm.collectionVariables.set('codigo_aula', jsonData.aula.codigoAcceso);",
+									"    console.log('✅ Aula creada. ID: ' + jsonData.aula._id + ' | Código: ' + jsonData.aula.codigoAcceso);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Prácticas Pre-Profesionales 2026-A\",\n  \"empresa\": \"Empresa Nacional de Electricidad\",\n  \"descripcion\": \"Aula para el seguimiento de prácticas del periodo 2026-A\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/aulas",
+							"host": ["{{base_url}}"],
+							"path": ["aulas"]
+						},
+						"description": "🔒 **Requiere Bearer Token de Docente** (verificación de rol `docente`).\n\n**Crea una nueva aula virtual** y genera automáticamente un código de acceso de 6 caracteres.\n\n⚡ **Script automático:** Guarda `id_aula` y `codigo_aula` en las variables de colección.\n\n**Body (JSON):**\n| Campo | Tipo | Obligatorio | Descripción |\n|---|---|---|---|\n| nombre | string | ✅ | 3-80 caracteres |\n| empresa | string | ✅ | 2-100 caracteres |\n| descripcion | string | ❌ | Máx 200 caracteres |\n\n**Respuesta exitosa (201):**\n```json\n{\n  \"msg\": \"Aula creada exitosamente\",\n  \"aula\": {\n    \"_id\": \"...\",\n    \"nombre\": \"Prácticas Pre-Profesionales 2026-A\",\n    \"codigoAcceso\": \"A1B2C3\",\n    \"docente\": \"...\",\n    \"estudiantes\": []\n  }\n}\n```"
+					}
+				},
+				{
+					"name": "07 - Listar Mis Aulas 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas",
+							"host": ["{{base_url}}"],
+							"path": ["aulas"]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\nLista todas las aulas **creadas por el docente** logueado."
+					}
+				},
+				{
+					"name": "08 - Ver Detalle de Aula 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas/{{id_aula}}",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "{{id_aula}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\nObtiene el detalle completo de un aula, incluyendo la lista de estudiantes inscritos con sus datos."
+					}
+				},
+				{
+					"name": "09 - Actualizar Aula 🔒",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Prácticas Pre-Profesionales 2026-B\",\n  \"empresa\": \"Empresa Nacional de Telecomunicaciones\",\n  \"descripcion\": \"Actualización para el nuevo periodo académico\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/aulas/{{id_aula}}",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "{{id_aula}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token de Docente propietario.**\n\nActualiza nombre, empresa y/o descripción de un aula. Solo el docente que la creó puede editarla.\n\n**Body (JSON):** Todos los campos son opcionales, solo envía los que quieras cambiar."
+					}
+				},
+				{
+					"name": "10 - Archivar Aula (Soft Delete) 🔒",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas/{{id_aula}}",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "{{id_aula}}"]
+						},
+						"description": "🔒 **Requiere Bearer Token de Docente propietario.**\n\n**Archiva un aula** (soft delete). No se borra de la base de datos, sino que cambia `estado: false`. El aula dejará de aparecer en las consultas.\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Aula archivada correctamente\"\n}\n```"
+					}
+				},
+				{
+					"name": "11 - Historial de Mensajes del Chat 🔒",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_docente}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/aulas/{{id_aula}}/mensajes?page=1&limit=50",
+							"host": ["{{base_url}}"],
+							"path": ["aulas", "{{id_aula}}", "mensajes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						},
+						"description": "🔒 **Requiere Bearer Token.**\n\nObtiene el historial de mensajes del chat de un aula."
+					}
+				}
+			]
+		},
+		{
+			"name": "🔑 Google OAuth (Completar Perfil)",
+			"description": "Endpoints relacionados con el flujo de **Google OAuth 2.0**.\n\nEl login con Google se maneja por redirección en el navegador (no se puede ejecutar desde Postman).\nPero una vez logueado con Google, si el perfil está incompleto, se usa este endpoint para completarlo.",
+			"item": [
+				{
+					"name": "01 - Completar Perfil (Post-Google Login) 🔒",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_estudiante}}",
+								"description": "Token JWT obtenido al loguearse con Google"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cedula\": \"1756789012\",\n  \"nombre\": \"Alex\",\n  \"apellido\": \"Barba\",\n  \"direccion\": \"Av. 10 de Agosto N37-123\",\n  \"celular\": \"0976543210\",\n  \"rol\": \"Estudiante\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuario/completar-perfil",
+							"host": ["{{base_url}}"],
+							"path": ["usuario", "completar-perfil"]
+						},
+						"description": "🔒 **Requiere Bearer Token** (del usuario que se autenticó con Google).\n\n**Completa los datos faltantes** de un usuario que se registró con Google OAuth.\n\nEste endpoint se invoca automáticamente desde el frontend cuando un usuario nuevo de Google inicia sesión por primera vez.\n\n**Body (JSON):**\n| Campo | Tipo | Obligatorio | Descripción |\n|---|---|---|---|\n| cedula | string | ✅ | 10 dígitos |\n| nombre | string | ❌ | Puede mantener el de Google o cambiarlo |\n| apellido | string | ❌ | Puede mantener el de Google o cambiarlo |\n| direccion | string | ❌ | Máx 40 caracteres |\n| celular | string | ❌ | 9-10 dígitos |\n| rol | string | ✅ | `Estudiante`, `Docente` o `Supervisor` |\n\n**Respuesta exitosa (200):**\n```json\n{\n  \"msg\": \"Perfil completado exitosamente\",\n  \"rol\": \"estudiante\",\n  \"nombre\": \"Alex\",\n  \"apellido\": \"Barba\"\n}\n```\n\n**Errores posibles:**\n- 400: Perfil ya completo o cédula ya registrada\n- 404: Usuario no encontrado"
+					}
+				},
+				{
+					"name": "ℹ️ Iniciar Login con Google (Solo Navegador)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/google",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "google"]
+						},
+						"description": "⚠️ **NOTA: Este endpoint NO funciona desde Postman.**\n\nDebe abrirse en un **navegador web** porque redirige a la pantalla de consentimiento de Google OAuth.\n\n**URL para abrir en el navegador:**\n```\nhttp://localhost:3000/api/auth/google\n```\n\n**Flujo:**\n1. El navegador redirige a Google.\n2. El usuario selecciona su cuenta.\n3. Google redirige al callback del backend.\n4. El backend genera un JWT y redirige al frontend con el token en la URL.\n\nDespués de completar este flujo, el token JWT se puede usar en Postman para los endpoints protegidos."
+					}
+				}
+			]
+		}
+	]
+}
