@@ -9,11 +9,10 @@ export const UserCardProfile = () => {
             {/* Contenedor de la Foto de Perfil */}
             <div className="relative mb-6 group">
                 <img 
-                    src="https://cdn-icons-png.flaticon.com/512/4715/4715329.png" 
-                    alt="img-client" 
-                    className="m-auto rounded-full border-4 border-slate-800 shadow-md transition duration-300 group-hover:border-slate-700" 
-                    width={128} 
-                    height={128} 
+                    src={user?.perfil || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"} 
+                    alt="avatar-usuario" 
+                    className="m-auto rounded-full border-4 border-slate-800 shadow-md transition duration-300 group-hover:border-slate-700 object-cover" 
+                    style={{ width: '128px', height: '128px' }}
                 />
                 
                 <label className="absolute bottom-1 right-1 bg-blue-600 text-white rounded-full p-2.5 cursor-pointer shadow-lg hover:bg-emerald-500 transition duration-200">

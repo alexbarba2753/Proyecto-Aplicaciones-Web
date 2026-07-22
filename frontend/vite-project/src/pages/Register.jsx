@@ -2,17 +2,47 @@ import { useState } from "react"
 import { MdVisibility, MdVisibilityOff } from "react-icons/md"
 import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { ToastContainer } from 'react-toastify' // Manteniendo Toastify aquí mismo
+import { ToastContainer, toast } from 'react-toastify' // Manteniendo Toastify aquí mismo
 import { useFetch } from "../hooks/useFetch"
+import axios from "axios"
 
 export const Register = () => {
     const [showPassword, setShowPassword] = useState(false)
+    const [verifyingCedula, setVerifyingCedula] = useState(false)
     const { fetchDataBackend, loading } = useFetch()
-    const { register, handleSubmit, formState: { errors } } = useForm()
+    const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm()
 
     const registerUser = async (dataForm) => {
         const url = `${import.meta.env.VITE_BACKEND_URL}/registro`
         await fetchDataBackend(url, dataForm, "POST")
+    }
+
+    const handleVerifyCedula = async () => {
+        const cedula = getValues("cedula")
+        
+        if (!cedula || cedula.length !== 10) {
+            toast.warning("Ingresa una cédula válida de 10 dígitos primero")
+            return
+        }
+
+        try {
+            setVerifyingCedula(true)
+            const url = `${import.meta.env.VITE_BACKEND_URL}/usuario/verificar-cedula/${cedula}`
+            const response = await axios.get(url)
+            
+            if (response.data.nombre) {
+                setValue("nombre", response.data.nombre, { shouldValidate: true })
+            }
+            if (response.data.apellido) {
+                setValue("apellido", response.data.apellido, { shouldValidate: true })
+            }
+            
+            toast.success("Cédula verificada con éxito")
+        } catch (error) {
+            toast.error(error.response?.data?.msg || "Error al verificar la cédula")
+        } finally {
+            setVerifyingCedula(false)
+        }
     }
 
     return (
@@ -29,6 +59,34 @@ export const Register = () => {
                     </small>
 
                     <form onSubmit={handleSubmit(registerUser)} className="space-y-3">
+
+                        {/* Campo Cédula */}
+                        <div>
+                            <label className="mb-1 block text-sm font-semibold text-gray-700">Cédula</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Ingresa tu cédula (10 dígitos)"
+                                    className="block w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-600 focus:outline-gray-400"
+                                    {...register("cedula", {
+                                        required: "La cédula es obligatoria para el registro local",
+                                        pattern: {
+                                            value: /^[0-9]{10}$/,
+                                            message: "La cédula debe tener exactamente 10 dígitos numéricos"
+                                        }
+                                    })}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleVerifyCedula}
+                                    disabled={verifyingCedula}
+                                    className="bg-slate-700 hover:bg-slate-800 text-white px-4 py-1.5 rounded-md text-sm font-medium transition disabled:opacity-50 whitespace-nowrap"
+                                >
+                                    {verifyingCedula ? "Verificando..." : "Verificar"}
+                                </button>
+                            </div>
+                            {errors.cedula && <p className="text-red-600 text-xs mt-1">{errors.cedula.message}</p>}
+                        </div>
 
                         {/* Campo nombre */}
                         <div>

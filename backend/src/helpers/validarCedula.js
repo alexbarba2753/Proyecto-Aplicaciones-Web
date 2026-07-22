@@ -68,9 +68,10 @@ const validarCedulaEcuador = async (cedula) => {
         const datos = respuesta.data
 
         // Extraemos nombre y apellido de la respuesta de EcuadorAPI
-        // La estructura puede variar, manejamos las variantes conocidas
-        const nombreCompleto = datos.nombre || datos.nombres || datos.name || ''
-        const apellidoCompleto = datos.apellido || datos.apellidos || datos.surname || ''
+        // La API devuelve un objeto con la propiedad "data" que contiene "first_name" y "last_name"
+        const info = datos.data || datos
+        const nombreCompleto = info.first_name || info.nombre || info.nombres || info.name || ''
+        const apellidoCompleto = info.last_name || info.apellido || info.apellidos || info.surname || ''
 
         if (!nombreCompleto && !apellidoCompleto) {
             // Si la API respondió pero sin datos de nombre, usamos los datos que vengan

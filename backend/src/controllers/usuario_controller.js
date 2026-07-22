@@ -464,6 +464,31 @@ const actualizarPassword = async (req, res) => {
     }
 }
 
+/**
+ * CONTROLADOR: Verifica una cédula con EcuadorAPI y devuelve nombre y apellido
+ */
+const verificarCedula = async (req, res) => {
+    try {
+        const { cedula } = req.params;
+        
+        if (!cedula || cedula.length !== 10) {
+            return res.status(400).json({ msg: "La cédula debe tener 10 dígitos" });
+        }
+
+        // Usamos la función helper que ya tiene la lógica de EcuadorAPI
+        const datos = await validarCedulaEcuador(cedula);
+        
+        if (datos.nombre || datos.apellido) {
+            return res.status(200).json(datos);
+        } else {
+            return res.status(404).json({ msg: "Cédula no encontrada en el registro civil" });
+        }
+
+    } catch (error) {
+        return res.status(400).json({ msg: error.message || "Error al verificar la cédula" });
+    }
+}
+
 // Exportamos toda la lista final de controladores unificados de tu proyecto
 export {
     registro,
@@ -474,5 +499,6 @@ export {
     login,
     perfil,
     actualizarPerfil,
-    actualizarPassword
+    actualizarPassword,
+    verificarCedula
 }

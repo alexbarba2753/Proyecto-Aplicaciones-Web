@@ -1,10 +1,13 @@
 import { Router } from 'express'
-import { confirmarMail, registro, crearNuevoPassword, recuperarPassword, comprobarTokenPasword, login, perfil, actualizarPerfil, actualizarPassword } from '../controllers/usuario_controller.js'
+import { confirmarMail, registro, crearNuevoPassword, recuperarPassword, comprobarTokenPasword, login, perfil, actualizarPerfil, actualizarPassword, verificarCedula } from '../controllers/usuario_controller.js'
 import { verificarTokenJWT } from '../middlewares/JWT.js'
 const router = Router()
 
 
 router.post('/registro', registro)
+
+
+router.get('/usuario/verificar-cedula/:cedula', verificarCedula)
 
 
 router.get('/confirmar/:token', confirmarMail)
