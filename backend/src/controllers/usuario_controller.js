@@ -21,46 +21,87 @@ import mongoose from "mongoose"
 const registro = async (req, res) => {
 
     try {
-        // [PASO 1]: Extraemos el email y password del cuerpo de la petición (lo que viene del formulario)
-        const { email, password, cedula } = req.body;
+        // [PASO 1]: Extraemos los datos del cuerpo de la petición
+        const { email, password, cedula, nombre, apellido, celular, direccion, rol } = req.body;
         
         // [PASO 2]: VALIDACIÓN DE CAMPOS VACÍOS
-        // Convertimos el objeto req.body en un arreglo de valores y verificamos si alguno es un texto vacío ("")
         if (Object.values(req.body).includes("")) {
             return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
         }
-        
+
+        // ═══════════════════════════════════════════════════════
+        // [PASO 2.5]: VALIDACIONES DE FORMATO (mismas que el frontend)
+        // ═══════════════════════════════════════════════════════
+        const regexLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+        const regexNumeros = /^[0-9]+$/;
+        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const rolesPermitidos = ['estudiante', 'docente', 'supervisor'];
+
+        // Validar nombre
+        if (!nombre || nombre.length < 2 || nombre.length > 15) {
+            return res.status(400).json({ msg: "El nombre debe tener entre 2 y 15 caracteres" });
+        }
+        if (!regexLetras.test(nombre)) {
+            return res.status(400).json({ msg: "El nombre solo puede contener letras y espacios" });
+        }
+
+        // Validar apellido
+        if (!apellido || apellido.length < 2 || apellido.length > 15) {
+            return res.status(400).json({ msg: "El apellido debe tener entre 2 y 15 caracteres" });
+        }
+        if (!regexLetras.test(apellido)) {
+            return res.status(400).json({ msg: "El apellido solo puede contener letras y espacios" });
+        }
+
+        // Validar cédula
+        if (!cedula) {
+            return res.status(400).json({ msg: "La cédula es obligatoria para el registro" });
+        }
+        if (!/^[0-9]{10}$/.test(cedula)) {
+            return res.status(400).json({ msg: "La cédula debe tener exactamente 10 dígitos numéricos" });
+        }
+
+        // Validar celular
+        if (!celular || celular.length < 9 || celular.length > 10) {
+            return res.status(400).json({ msg: "El celular debe tener entre 9 y 10 dígitos" });
+        }
+        if (!regexNumeros.test(celular)) {
+            return res.status(400).json({ msg: "El celular solo puede contener números" });
+        }
+
+        // Validar dirección
+        if (direccion && direccion.length > 40) {
+            return res.status(400).json({ msg: "La dirección no puede exceder los 40 caracteres" });
+        }
+
+        // Validar email
+        if (!email || !regexEmail.test(email)) {
+            return res.status(400).json({ msg: "Debes ingresar un correo electrónico válido" });
+        }
+
+        // Validar rol
+        if (!rol || !rolesPermitidos.includes(rol.toLowerCase().trim())) {
+            return res.status(400).json({ msg: "El rol debe ser Estudiante, Docente o Supervisor" });
+        }
+
+        // Validar contraseña
+        if (!password || password.length < 6) {
+            return res.status(400).json({ msg: "La contraseña debe tener al menos 6 caracteres" });
+        }
+
         // [PASO 3]: VALIDACIÓN DE DUPLICADOS EN BDD
-        // Hacemos una consulta asíncrona a MongoDB para ver si ya existe alguien con ese mismo correo 
         const verificarEmailBDD = await Usuario.findOne({ email });
         if (verificarEmailBDD) {
             return res.status(400).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
         }
 
-        // ═══════════════════════════════════════════════════════
-        // 🆕 [PASO 3.5]: VALIDAR CÉDULA CON ECUADORAPI
-        // Obligatorio en registro local. Verifica que la persona exista en el Registro Civil.
-        // ═══════════════════════════════════════════════════════
-        
-        if (!cedula) {
-            return res.status(400).json({ msg: "La cédula es obligatoria para el registro" });
-        }
-
-        // Verificar que la cédula no esté ya registrada en otro usuario
+        // Verificar que la cédula no esté ya registrada
         const cedulaExistente = await Usuario.findOne({ cedula });
         if (cedulaExistente) {
             return res.status(400).json({ msg: "La cédula ya se encuentra registrada en otro usuario" });
         }
-
-        // ═══════════════════════════════════════════════════════
-        // NOTA: Para no gastar saldo de EcuadorAPI en fase de pruebas,
-        // ya NO verificamos la cédula aquí obligatoriamente. 
-        // Solo se verifica si el usuario le da al botón "Verificar" en el frontend.
-        // Confiamos en los datos que llegan en req.body.nombre y req.body.apellido.
-        // ═══════════════════════════════════════════════════════
         
         // [PASO 4]: NORMALIZAR EL ROL A MINÚSCULAS
-        // Aseguramos consistencia independientemente de cómo llegue del formulario
         if (req.body.rol) {
             req.body.rol = req.body.rol.toLowerCase().trim();
         }
@@ -382,19 +423,37 @@ const actualizarPerfil = async (req, res) => {
         if (Object.values(req.body).includes("")) {
             return res.status(400).json({ msg: "Debes llenar todos los campos" });
         }
+
+        // [PASO 4.5]: VALIDACIONES DE FORMATO
+        const regexLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+        const regexNumeros = /^[0-9]+$/;
+        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (nombre && (nombre.length < 2 || nombre.length > 15 || !regexLetras.test(nombre))) {
+            return res.status(400).json({ msg: "El nombre debe tener entre 2 y 15 caracteres y solo contener letras" });
+        }
+        if (apellido && (apellido.length < 2 || apellido.length > 15 || !regexLetras.test(apellido))) {
+            return res.status(400).json({ msg: "El apellido debe tener entre 2 y 15 caracteres y solo contener letras" });
+        }
+        if (celular && (celular.length < 9 || celular.length > 10 || !regexNumeros.test(celular))) {
+            return res.status(400).json({ msg: "El celular debe tener entre 9 y 10 dígitos numéricos" });
+        }
+        if (direccion && direccion.length > 40) {
+            return res.status(400).json({ msg: "La dirección no puede exceder los 40 caracteres" });
+        }
+        if (email && !regexEmail.test(email)) {
+            return res.status(400).json({ msg: "Debes ingresar un correo electrónico válido" });
+        }
         
         // [PASO 5]: CONTROL DE CORREOS DUPLICADOS
-        // Si el usuario está intentando cambiar su email por uno nuevo...
         if (usuarioBDD.email !== email) {
-            // Salimos a buscar si ese NUEVO email ya le pertenece a otro estudiante o docente en el sistema
             const emailExistente = await Usuario.findOne({ email });
             if (emailExistente) {
                 return res.status(404).json({ msg: `El email ya se encuentra registrado` });  
             }
         }
         
-        // [PASO 6]: ASIGNACIÓN DE NUEVOS VALORES (Operador ??)
-        // Si llega un dato nuevo en el body lo usa; si llega como null o undefined, conserva el que ya estaba en la BDD.
+        // [PASO 6]: ASIGNACIÓN DE NUEVOS VALORES
         usuarioBDD.nombre = nombre ?? usuarioBDD.nombre;
         usuarioBDD.apellido = apellido ?? usuarioBDD.apellido;
         usuarioBDD.direccion = direccion ?? usuarioBDD.direccion;
@@ -506,9 +565,44 @@ const completarPerfilGoogle = async (req, res) => {
             return res.status(400).json({ msg: "Tu perfil ya está completo" });
         }
 
-        // Verificamos si la cédula fue enviada
+        // ═══════════════════════════════════════════════════════
+        // VALIDACIONES DE FORMATO
+        // ═══════════════════════════════════════════════════════
+        const regexLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+        const regexNumeros = /^[0-9]+$/;
+        const rolesPermitidos = ['estudiante', 'docente', 'supervisor'];
+
+        // Validar cédula
         if (!cedula) {
             return res.status(400).json({ msg: "La cédula es obligatoria para completar el registro" });
+        }
+        if (!/^[0-9]{10}$/.test(cedula)) {
+            return res.status(400).json({ msg: "La cédula debe tener exactamente 10 dígitos numéricos" });
+        }
+
+        // Validar nombre
+        if (nombre && (nombre.length < 2 || nombre.length > 15 || !regexLetras.test(nombre))) {
+            return res.status(400).json({ msg: "El nombre debe tener entre 2 y 15 caracteres y solo contener letras" });
+        }
+
+        // Validar apellido
+        if (apellido && (apellido.length < 2 || apellido.length > 15 || !regexLetras.test(apellido))) {
+            return res.status(400).json({ msg: "El apellido debe tener entre 2 y 15 caracteres y solo contener letras" });
+        }
+
+        // Validar celular
+        if (celular && (celular.length < 9 || celular.length > 10 || !regexNumeros.test(celular))) {
+            return res.status(400).json({ msg: "El celular debe tener entre 9 y 10 dígitos numéricos" });
+        }
+
+        // Validar dirección
+        if (direccion && direccion.length > 40) {
+            return res.status(400).json({ msg: "La dirección no puede exceder los 40 caracteres" });
+        }
+
+        // Validar rol
+        if (rol && !rolesPermitidos.includes(rol.toLowerCase().trim())) {
+            return res.status(400).json({ msg: "El rol debe ser Estudiante, Docente o Supervisor" });
         }
 
         // Verificar que la cédula no esté ya en uso
