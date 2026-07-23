@@ -1,39 +1,34 @@
-import nodemailer from "nodemailer"
-import dotenv from "dotenv"
-dotenv.config()
+import sgMail from '@sendgrid/mail';
+import dotenv from 'dotenv';
+dotenv.config();
 
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.USER_MAILTRAP, 
-        pass: process.env.PASS_MAILTRAP, 
-    },
-    tls: {
-        rejectUnauthorized: false 
-    }
-});
+// ═══════════════════════════════════════════════════════
+// CONFIGURACIÓN DE SENDGRID
+// Reemplaza a Nodemailer/Gmail para evitar bloqueos en servidores cloud.
+// ═══════════════════════════════════════════════════════
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 /**
- * Función genérica para enviar correos
+ * Función genérica para enviar correos usando SendGrid
  * @param {string} to - Email del destinatario
  * @param {string} subject - Asunto del correo
  * @param {string} html - Contenido HTML del correo
  */
 const sendMail = async (to, subject, html) => {
-
     try {
-        const info = await transporter.sendMail({
-            from: `"Sistema de Prácticas ESFOT" <${process.env.USER_MAILTRAP}>`,
+        const msg = {
             to,
+            from: process.env.SENDGRID_SENDER_EMAIL, // Debes usar un email autorizado/verificado en SendGrid
             subject,
             html,
-        })
-        console.log("✅ Email enviado:", info.messageId)
+        };
+
+        const response = await sgMail.send(msg);
+        console.log("✅ Email enviado vía SendGrid:", response[0].headers['x-message-id']);
 
     } catch (error) {
-        console.error("❌ Error enviando email:", error.message)
+        console.error("❌ Error enviando email con SendGrid:", error.response ? error.response.body : error.message);
     }
-}
+};
 
-export default sendMail
+export default sendMail;
